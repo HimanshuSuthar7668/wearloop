@@ -2,12 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { authApi } from "@/lib/api";
-import { setAuthToken } from "@/lib/utils";
+import { setAuthToken, setAuthUser } from "@/lib/utils";
 import Button from "@/components/ui/Button";
 
 export default function AuthPage() {
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/shop";
+
   const [tab, setTab] = useState<"login" | "register">("login");
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -19,9 +23,10 @@ export default function AuthPage() {
     setLoading(true);
     try {
       if (tab === "login") {
-        const res = await authApi.login(form.email, form.password) as { token: string };
+        const res = await authApi.login(form.email, form.password);
         setAuthToken(res.token);
-        window.location.href = "/shop";
+        setAuthUser(res.user);
+        window.location.href = redirectTo;
       } else {
         await authApi.register(form.name, form.email, form.password);
         setTab("login");
@@ -32,6 +37,7 @@ export default function AuthPage() {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen flex">

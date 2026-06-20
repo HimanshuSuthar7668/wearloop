@@ -58,10 +58,10 @@ export const ordersApi = {
     request("/orders", { method: "POST", body: JSON.stringify(data), token }),
 
   getMyOrders: (token: string) =>
-    request("/orders/my", { token }),
+    request("/orders", { token }),
 
   cancel: (id: string, token: string) =>
-    request(`/orders/${id}/cancel`, { method: "PATCH", token }),
+    request(`/orders/${id}/cancel`, { method: "POST", token }),
 };
 
 // Payments
@@ -73,4 +73,22 @@ export const paymentsApi = {
     request("/payments/my", { token }),
 };
 
-export default { authApi, productsApi, ordersApi, paymentsApi };
+// Cart
+export const cartApi = {
+  addToCart: (productId: number, token: string) =>
+    request<{ id: number; user_id: number; product_id: number; created_at: string }>(
+      "/cart",
+      { method: "POST", body: JSON.stringify({ productId }), token }
+    ),
+
+  checkInCart: (productId: number, token: string) =>
+    request<{ inCart: boolean }>(`/cart/check/${productId}`, { token }),
+
+  getAll: (token: string) =>
+    request<{ id: number; user_id: number; product_id: number; created_at: string }[]>(
+      "/cart",
+      { token }
+    ),
+};
+
+export default { authApi, productsApi, ordersApi, paymentsApi, cartApi };

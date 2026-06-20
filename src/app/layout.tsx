@@ -3,6 +3,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { AppProvider } from "@/context/AppContext";
 
 export const metadata: Metadata = {
   title: "WearLoop — Rent. Wear. Return. Repeat.",
@@ -21,9 +22,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="bg-charcoal text-parchment font-body antialiased">
-        <Navbar />
-        <main>{children}</main>
-        <Footer />
+        <AppProvider>
+          <Navbar />
+          <main>{children}</main>
+          <Footer />
+        </AppProvider>
       </body>
     </html>
   );

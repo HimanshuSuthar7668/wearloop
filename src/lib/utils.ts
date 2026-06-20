@@ -32,15 +32,76 @@ export function getSavingsPercentage(rentalPrice: number, retailPrice: number): 
   return Math.round(((retailPrice - rentalPrice) / retailPrice) * 100);
 }
 
+export function setCookie(name: string, value: string, days = 7): void {
+  if (typeof document === "undefined") return;
+  const date = new Date();
+  date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+  const expires = `; expires=${date.toUTCString()}`;
+  document.cookie = `${name}=${encodeURIComponent(value)}${expires}; path=/; SameSite=Lax`;
+}
+
+export function getCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) {
+    return decodeURIComponent(parts.pop()?.split(";").shift() || "");
+  }
+  return null;
+}
+
+export function removeCookie(name: string): void {
+  if (typeof document === "undefined") return;
+  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax`;
+}
+
 export function getAuthToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("wearloop_token");
+  return getCookie("wearloop_token");
 }
 
 export function setAuthToken(token: string): void {
-  localStorage.setItem("wearloop_token", token);
+  setCookie("wearloop_token", token, 1);
+  // Backwards compatibility
+  if (typeof window !== "undefined") {
+    localStorage.setItem("wearloop_token", token);
+  }
 }
 
 export function removeAuthToken(): void {
-  localStorage.removeItem("wearloop_token");
+  removeCookie("wearloop_token");
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("wearloop_token");
+  }
 }
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
+export function getAuthUser(): AuthUser | null {
+  const userStr = getCookie("wearloop_user");
+  if (!userStr) return null;
+  try {
+    return JSON.parse(userStr);
+  } catch {
+    return null;
+  }
+}
+
+export function setAuthUser(user: AuthUser): void {
+  setCookie("wearloop_user", JSON.stringify(user), 1);
+  if (typeof window !== "undefined") {
+    localStorage.setItem("wearloop_user", JSON.stringify(user));
+  }
+}
+
+export function removeAuthUser(): void {
+  removeCookie("wearloop_user");
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("wearloop_user");
+  }
+}
+

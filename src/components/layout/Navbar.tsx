@@ -5,6 +5,8 @@ import Link from "next/link";
 import { ShoppingBag, Menu, X, User, Search } from "lucide-react";
 import Image from "next/image";
 import logo from "@/../public/images/wearloop-logo.svg";
+import { getAuthUser, removeAuthToken, removeAuthUser } from "@/lib/utils";
+import { useAppStore } from "@/context/AppContext";
 
 const navLinks = [
   { href: "/shop", label: "Shop" },
@@ -15,10 +17,16 @@ const navLinks = [
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const { cart } = useAppStore();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", onScroll);
+    
+    // Check auth cookie
+    setUser(getAuthUser());
+    
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
@@ -59,11 +67,16 @@ export default function Navbar() {
             <Search size={18} />
           </Link>
           <Link
-            href="/auth"
-            className="hidden md:flex p-2 text-parchment/60 hover:text-parchment transition-colors"
+            href={user ? "/profile" : "/auth"}
+            className="hidden md:flex p-2 text-parchment/60 hover:text-parchment transition-colors items-center gap-1.5"
             aria-label="Account"
           >
             <User size={18} />
+            {user && (
+              <span className="text-xs font-medium max-w-[80px] truncate text-parchment/80">
+                {user.name.split(" ")[0]}
+              </span>
+            )}
           </Link>
           <Link
             href="/cart"
@@ -71,9 +84,11 @@ export default function Navbar() {
             aria-label="Cart"
           >
             <ShoppingBag size={18} />
-            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-rose text-charcoal text-[10px] font-semibold rounded-full flex items-center justify-center">
-              0
-            </span>
+            {cart.length > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-rose text-charcoal text-[10px] font-semibold rounded-full flex items-center justify-center">
+                {cart.length}
+              </span>
+            )}
           </Link>
           <button
             className="md:hidden p-2 text-parchment/60 hover:text-parchment transition-colors"
@@ -98,21 +113,47 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
-          <div className="pt-4 border-t border-parchment/10 flex gap-4">
-            <Link
-              href="/auth"
-              onClick={() => setMenuOpen(false)}
-              className="flex-1 text-center py-2.5 border border-parchment/20 rounded text-sm text-parchment/70 hover:border-parchment/50 transition-colors"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/auth?tab=register"
-              onClick={() => setMenuOpen(false)}
-              className="flex-1 text-center py-2.5 bg-rose text-charcoal rounded text-sm font-medium hover:bg-rose-dark transition-colors"
-            >
-              Join Free
-            </Link>
+          <div className="pt-4 border-t border-parchment/10 flex flex-col gap-3">
+            {user ? (
+              <>
+                <Link
+                  href="/profile"
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full text-center py-2.5 bg-rose text-charcoal rounded text-sm font-semibold hover:bg-rose-dark transition-colors"
+                >
+                  My Profile ({user.name})
+                </Link>
+                <button
+                  onClick={() => {
+                    removeAuthToken();
+                    removeAuthUser();
+                    setUser(null);
+                    setMenuOpen(false);
+                    window.location.href = "/";
+                  }}
+                  className="w-full text-center py-2.5 border border-red-500/20 text-red-400 rounded text-sm hover:bg-red-500/10 transition-colors font-medium"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <div className="flex gap-4">
+                <Link
+                  href="/auth"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex-1 text-center py-2.5 border border-parchment/20 rounded text-sm text-parchment/70 hover:border-parchment/50 transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/auth?tab=register"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex-1 text-center py-2.5 bg-rose text-charcoal rounded text-sm font-medium hover:bg-rose-dark transition-colors"
+                >
+                  Join Free
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}
