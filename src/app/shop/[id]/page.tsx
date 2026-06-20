@@ -25,7 +25,7 @@ export default function ProductDetailPage({ params }: PageProps) {
           <p className="font-display text-2xl text-parchment/40 mb-3">
             Piece not found
           </p>
-          <Link href="/shop" className="text-sm text-rose hover:underline">
+          <Link href="/shop" className="text-sm text-[#c9a898] hover:underline">
             Back to shop
           </Link>
         </div>
@@ -72,7 +72,7 @@ export default function ProductDetailPage({ params }: PageProps) {
             >
               <Heart
                 size={18}
-                className={wished ? "fill-rose text-rose" : "text-parchment/60"}
+                className={wished ? "fill-rose text-[#c9a898]" : "text-parchment/60"}
               />
             </button>
           </div>
@@ -81,11 +81,11 @@ export default function ProductDetailPage({ params }: PageProps) {
           <div className="flex flex-col gap-6">
             <div>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs uppercase tracking-widest text-rose">
+                <span className="text-xs uppercase tracking-widest text-[#c9a898]">
                   {product.brand}
                 </span>
                 <div className="flex items-center gap-1.5 text-sm text-parchment/50">
-                  <Star size={12} className="fill-rose text-rose" />
+                  <Star size={12} className="fill-rose text-[#c9a898]" />
                   <span>{product.rating}</span>
                   <span className="text-parchment/30">({product.reviewCount})</span>
                 </div>

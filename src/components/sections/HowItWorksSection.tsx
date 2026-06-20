@@ -29,7 +29,7 @@ export default function HowItWorksSection() {
     <section className="py-24 bg-charcoal-light">
       <div className="max-w-7xl mx-auto px-6 md:px-10">
         <div className="text-center mb-16">
-          <p className="text-xs uppercase tracking-[0.25em] text-rose mb-3">
+          <p className="text-xs uppercase tracking-[0.25em] text-[#c9a898] mb-3">
             Simple by design
           </p>
           <h2 className="font-display text-4xl md:text-5xl font-bold text-parchment">
@@ -53,7 +53,7 @@ export default function HowItWorksSection() {
 
               {/* Icon */}
               <div className="w-12 h-12 rounded-xl bg-rose/10 border border-rose/20 flex items-center justify-center">
-                <Icon size={20} className="text-rose" />
+                <Icon size={20} className="text-[#c9a898]" />
               </div>
 
               <div>

@@ -33,7 +33,7 @@ export default function HeroSection() {
           <div className="flex flex-col gap-6 animate-fade-up">
             <div className="flex items-center gap-3">
               <div className="w-8 h-px bg-rose" />
-              <span className="text-xs uppercase tracking-[0.25em] text-rose font-medium">
+              <span className="text-xs uppercase tracking-[0.25em] text-[#c9a898] font-medium">
                 Circular Fashion
               </span>
             </div>
@@ -41,12 +41,12 @@ export default function HeroSection() {
             <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05] text-parchment text-balance">
               Your wardrobe,
               <br />
-              <em className="text-rose not-italic">infinitely</em>
+              <em className="text-[#c9a898]">infinitely</em>
               <br />
               renewed.
             </h1>
 
-            <p className="text-parchment/55 text-base md:text-lg leading-relaxed max-w-sm">
+            <p className="text-parchment text-base md:text-lg leading-relaxed max-w-sm">
               Wear designer pieces for any occasion. Return when done. Someone
               else&apos;s wardrobe becomes yours — and yours becomes theirs.
             </p>
@@ -130,7 +130,7 @@ export default function HeroSection() {
                 </defs>
                 <text
                   fill="none"
-                  className="text-rose"
+                  className="text-[#c9a898]"
                   style={{ fill: "#C9A898", fontSize: "11px", letterSpacing: "3px" }}
                 >
                   <textPath href="#circle-path">{circleText}</textPath>

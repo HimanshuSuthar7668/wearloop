@@ -70,13 +70,13 @@ export default function HowItWorksPage() {
     <div className="min-h-screen pt-20">
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 md:px-10 py-16 text-center">
-        <p className="text-xs uppercase tracking-[0.25em] text-rose mb-4">
+        <p className="text-xs uppercase tracking-[0.25em] text-[#c9a898] mb-4">
           Simple by design
         </p>
         <h1 className="font-display text-5xl md:text-6xl font-bold text-parchment mb-5 text-balance">
           Renting clothes should be
           <br />
-          <em className="not-italic text-rose">this easy.</em>
+          <em className="not-italic text-[#c9a898]">this easy.</em>
         </h1>
         <p className="text-parchment/50 text-lg max-w-lg mx-auto">
           From browsing to your door in a few taps. No subscriptions, no
@@ -97,7 +97,7 @@ export default function HowItWorksPage() {
               </span>
               <div className="flex items-start gap-5">
                 <div className="shrink-0 w-12 h-12 rounded-xl bg-rose/10 border border-rose/20 flex items-center justify-center">
-                  <Icon size={20} className="text-rose" />
+                  <Icon size={20} className="text-[#c9a898]" />
                 </div>
                 <div>
                   <h2 className="font-display text-xl font-semibold text-parchment mb-2">

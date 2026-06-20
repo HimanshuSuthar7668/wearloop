@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ShoppingBag, Menu, X, User, Search } from "lucide-react";
+import Image from "next/image";
+import logo from "@/../public/images/wearloop-logo.svg";
 
 const navLinks = [
   { href: "/shop", label: "Shop" },
@@ -22,21 +24,15 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? "bg-charcoal/95 backdrop-blur-md border-b border-parchment/10"
-          : "bg-transparent"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled ? "bg-charcoal/95 backdrop-blur-md border-b border-parchment/10" : "bg-transparent"
       }`}
     >
       <nav className="max-w-7xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-7 h-7 rounded-full border-2 border-rose flex items-center justify-center">
-            <div className="w-2.5 h-2.5 rounded-full bg-rose group-hover:scale-110 transition-transform" />
-          </div>
-          <span className="font-display text-xl font-semibold tracking-wide text-parchment">
-            WearLoop
-          </span>
+          <Image src={logo} alt="WearLoop Logo" width={40} height={40} />
+          <span className="font-display text-xl font-semibold tracking-wide text-parchment">WearLoop</span>
         </Link>
 
         {/* Desktop nav */}

@@ -149,7 +149,7 @@ export default function AuthPage() {
         {tab === "login" && (
           <p className="text-xs text-parchment/30 text-center mt-6">
             Forgot your password?{" "}
-            <a href="#" className="text-rose hover:underline">
+            <a href="#" className="text-[#c9a898] hover:underline">
               Reset it
             </a>
           </p>
@@ -176,7 +176,7 @@ export default function AuthPage() {
               (stat) => (
                 <div key={stat} className="text-center">
                   <p
-                    className="font-display text-lg font-semibold text-rose whitespace-pre-line"
+                    className="font-display text-lg font-semibold text-[#c9a898] whitespace-pre-line"
                     style={{ whiteSpace: "pre-line" }}
                   >
                     {stat.split("\n")[0]}

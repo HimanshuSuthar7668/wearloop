@@ -33,13 +33,13 @@ export default function AboutPage() {
     <div className="min-h-screen pt-20">
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 md:px-10 pt-16 pb-12 text-center">
-        <p className="text-xs uppercase tracking-[0.25em] text-rose mb-4">
+        <p className="text-xs uppercase tracking-[0.25em] text-[#c9a898] mb-4">
           Our story
         </p>
         <h1 className="font-display text-5xl md:text-6xl font-bold text-parchment mb-6 text-balance">
           We built the wardrobe
           <br />
-          <em className="not-italic text-rose">the planet needed.</em>
+          <em className="not-italic text-[#c9a898]">the planet needed.</em>
         </h1>
         <p className="text-parchment/50 text-lg leading-relaxed max-w-xl mx-auto">
           WearLoop started with a simple observation: the average piece of
@@ -79,7 +79,7 @@ export default function AboutPage() {
                 className="p-8 rounded-2xl border border-parchment/8 hover:border-parchment/20 transition-colors"
               >
                 <div className="w-12 h-12 rounded-xl bg-rose/10 border border-rose/20 flex items-center justify-center mb-5">
-                  <Icon size={20} className="text-rose" />
+                  <Icon size={20} className="text-[#c9a898]" />
                 </div>
                 <h3 className="font-display text-lg font-semibold text-parchment mb-3">
                   {title}

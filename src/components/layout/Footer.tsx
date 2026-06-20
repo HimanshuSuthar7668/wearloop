@@ -45,21 +45,21 @@ export default function Footer() {
             <div className="flex gap-4 mt-6">
               <a
                 href="#"
-                className="text-parchment/40 hover:text-rose transition-colors"
+                className="text-parchment/40 hover:text-[#c9a898] transition-colors"
                 aria-label="Instagram"
               >
                 <Instagram size={18} />
               </a>
               <a
                 href="#"
-                className="text-parchment/40 hover:text-rose transition-colors"
+                className="text-parchment/40 hover:text-[#c9a898] transition-colors"
                 aria-label="Twitter"
               >
                 <Twitter size={18} />
               </a>
               <a
                 href="#"
-                className="text-parchment/40 hover:text-rose transition-colors"
+                className="text-parchment/40 hover:text-[#c9a898] transition-colors"
                 aria-label="YouTube"
               >
                 <Youtube size={18} />

@@ -11,12 +11,12 @@ export default function CTASection() {
           <div className="absolute bottom-0 right-1/4 w-48 h-48 bg-sage/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="relative">
-            <p className="text-xs uppercase tracking-[0.25em] text-rose mb-4">
+            <p className="text-xs uppercase tracking-[0.25em] text-[#c9a898] mb-4">
               Start today
             </p>
             <h2 className="font-display text-4xl md:text-6xl font-bold text-parchment mb-5 text-balance">
               Your first rental is{" "}
-              <em className="not-italic text-rose">on us.</em>
+              <em className="not-italic text-[#c9a898]">on us.</em>
             </h2>
             <p className="text-parchment/50 mb-10 max-w-md mx-auto">
               Sign up today and get ₹500 off your first rental. No subscription

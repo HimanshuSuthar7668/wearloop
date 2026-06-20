@@ -159,7 +159,7 @@ export default function ShopPage() {
               {JSON.stringify(filters) !== JSON.stringify(defaultFilters) && (
                 <button
                   onClick={() => setFilters(defaultFilters)}
-                  className="flex items-center gap-1 text-xs text-rose hover:text-rose-dark transition-colors self-end mb-1"
+                  className="flex items-center gap-1 text-xs text-[#c9a898] hover:text-[#c9a898]-dark transition-colors self-end mb-1"
                 >
                   <X size={12} />
                   Clear all
@@ -192,7 +192,7 @@ export default function ShopPage() {
             </p>
             <button
               onClick={() => setFilters(defaultFilters)}
-              className="mt-4 text-xs text-rose hover:underline"
+              className="mt-4 text-xs text-[#c9a898] hover:underline"
             >
               Reset filters
             </button>

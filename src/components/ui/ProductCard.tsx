@@ -69,7 +69,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         >
           <Heart
             size={14}
-            className={wished ? "fill-rose text-rose" : "text-parchment/70"}
+            className={wished ? "fill-rose text-[#c9a898]" : "text-parchment/70"}
           />
         </button>
       </div>
@@ -81,14 +81,14 @@ export default function ProductCard({ product }: ProductCardProps) {
             {product.brand}
           </span>
           <div className="flex items-center gap-1 text-xs text-parchment/40">
-            <Star size={10} className="fill-rose text-rose" />
+            <Star size={10} className="fill-rose text-[#c9a898]" />
             <span>{product.rating}</span>
           </div>
         </div>
 
         <Link
           href={`/shop/${product.id}`}
-          className="font-display text-sm text-parchment hover:text-rose transition-colors line-clamp-1"
+          className="font-display text-sm text-parchment hover:text-[#c9a898] transition-colors line-clamp-1"
         >
           {product.name}
         </Link>
