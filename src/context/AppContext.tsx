@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Product } from "@/types";
 import { mockProducts as initialMockProducts } from "@/lib/mockData";
+import { productsApi, cartApi } from "@/lib/api";
+import { getAuthToken } from "@/lib/utils";
 
 export interface CartItem {
   productId: string;
@@ -13,9 +15,9 @@ export interface CartItem {
 interface AppContextType {
   products: Product[];
   cart: CartItem[];
-  addToCart: (productId: string, size: string, days: number) => boolean;
-  removeFromCart: (productId: string) => void;
-  clearCart: () => void;
+  addToCart: (productId: string, size: string, days: number) => Promise<boolean>;
+  removeFromCart: (productId: string) => Promise<void>;
+  clearCart: () => Promise<void>;
   addProduct: (product: Omit<Product, "id" | "rating" | "reviewCount" | "available">) => void;
   updateProduct: (id: string, updatedFields: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
@@ -28,66 +30,88 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [loaded, setLoaded] = useState(false);
 
-  // Load from local storage
+  // Initialize products and cart from backend on mount
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedProducts = localStorage.getItem("wearloop_products");
-      if (storedProducts) {
-        try {
-          setProducts(JSON.parse(storedProducts));
-        } catch {
-          setProducts(initialMockProducts);
+    const initApp = async () => {
+      // 1. Fetch products
+      let activeProducts = initialMockProducts;
+      try {
+        const prodData = await productsApi.getAll();
+        if (prodData && prodData.length > 0) {
+          activeProducts = prodData;
         }
-      } else {
-        setProducts(initialMockProducts);
-        localStorage.setItem("wearloop_products", JSON.stringify(initialMockProducts));
+      } catch (err) {
+        console.error("Failed to load products from backend API, using mock data fallback:", err);
       }
+      setProducts(activeProducts);
 
-      const storedCart = localStorage.getItem("wearloop_cart");
-      if (storedCart) {
+      // 2. Fetch cart if authorized
+      const token = getAuthToken();
+      let activeCart: CartItem[] = [];
+      if (token) {
         try {
-          setCart(JSON.parse(storedCart));
-        } catch {
-          setCart([]);
+          const backendCart = await cartApi.getAll(token);
+          if (backendCart && Array.isArray(backendCart)) {
+            activeCart = backendCart.map((item) => ({
+              productId: String(item.product_id),
+              size: "M", // default size as db doesn't store size
+              days: 3,   // default rental days
+            }));
+          }
+        } catch (err) {
+          console.error("Failed to load cart from backend API:", err);
         }
       }
+      setCart(activeCart);
       setLoaded(true);
-    }
+    };
+
+    initApp();
   }, []);
 
-  // Save products to local storage
-  const saveProducts = (newProducts: Product[]) => {
-    setProducts(newProducts);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wearloop_products", JSON.stringify(newProducts));
-    }
-  };
+  const addToCart = async (productId: string, size: string, days: number): Promise<boolean> => {
+    const token = getAuthToken();
+    if (!token) return false;
 
-  // Save cart to local storage
-  const saveCart = (newCart: CartItem[]) => {
-    setCart(newCart);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wearloop_cart", JSON.stringify(newCart));
-    }
-  };
-
-  const addToCart = (productId: string, size: string, days: number): boolean => {
-    // Same product can't be added again until it's removed
+    // Check if already exists in state
     const alreadyExists = cart.some((item) => item.productId === productId);
     if (alreadyExists) return false;
 
     const newCart = [...cart, { productId, size, days }];
-    saveCart(newCart);
+    setCart(newCart);
+
+    try {
+      await cartApi.addToCart(Number(productId), token);
+    } catch (err) {
+      console.error("Failed to add to backend cart:", err);
+    }
     return true;
   };
 
-  const removeFromCart = (productId: string) => {
+  const removeFromCart = async (productId: string) => {
+    const token = getAuthToken();
     const newCart = cart.filter((item) => item.productId !== productId);
-    saveCart(newCart);
+    setCart(newCart);
+
+    if (token) {
+      try {
+        await cartApi.removeFromCart(Number(productId), token);
+      } catch (err) {
+        console.error("Failed to remove from backend cart:", err);
+      }
+    }
   };
 
-  const clearCart = () => {
-    saveCart([]);
+  const clearCart = async () => {
+    setCart([]);
+    const token = getAuthToken();
+    if (token) {
+      try {
+        await cartApi.clearCart(token);
+      } catch (err) {
+        console.error("Failed to clear backend cart:", err);
+      }
+    }
   };
 
   const addProduct = (newProdData: Omit<Product, "id" | "rating" | "reviewCount" | "available">) => {
@@ -103,7 +127,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       reviewCount: 0,
       available: true
     };
-    saveProducts([...products, newProduct]);
+    setProducts([...products, newProduct]);
   };
 
   const updateProduct = (id: string, updatedFields: Partial<Product>) => {
@@ -113,12 +137,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       return p;
     });
-    saveProducts(newProducts);
+    setProducts(newProducts);
   };
 
   const deleteProduct = (id: string) => {
     const newProducts = products.filter((p) => p.id !== id);
-    saveProducts(newProducts);
+    setProducts(newProducts);
     // Also remove from cart if it was there
     removeFromCart(id);
   };

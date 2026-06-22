@@ -44,12 +44,14 @@ export const authApi = {
 };
 
 // Products
+import type { Product } from "@/types";
+
 export const productsApi = {
   getAll: (params?: Record<string, string>) => {
     const query = params ? "?" + new URLSearchParams(params).toString() : "";
-    return request(`/products${query}`);
+    return request<Product[]>(`/products${query}`);
   },
-  getById: (id: string) => request(`/products/${id}`),
+  getById: (id: string) => request<Product>(`/products/${id}`),
 };
 
 // Orders
@@ -89,6 +91,13 @@ export const cartApi = {
       "/cart",
       { token }
     ),
+
+  removeFromCart: (productId: number, token: string) =>
+    request<{ message: string }>(`/cart/${productId}`, { method: "DELETE", token }),
+
+  clearCart: (token: string) =>
+    request<{ message: string }>("/cart", { method: "DELETE", token }),
 };
 
 export default { authApi, productsApi, ordersApi, paymentsApi, cartApi };
+

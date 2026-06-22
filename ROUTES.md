@@ -156,6 +156,12 @@ Retrieves a list of all products. **Public — no authentication required.**
 - **Method**: `GET`
 - **Auth Required**: No
 - **Headers**: `Content-Type: application/json`
+- **Response Fields**:
+  - `id` (number)
+  - `item_name` (string)
+  - `stock` (number)
+  - `created_at` (string)
+
 - **Response (Success - 200 OK)**:
   ```json
   {
@@ -163,13 +169,15 @@ Retrieves a list of all products. **Public — no authentication required.**
     "data": [
       {
         "id": 1,
-        "name": "Product A",
+        "item_name": "Product A",
         "stock": 10,
         "created_at": "2026-06-11T10:00:00.000Z"
       }
     ]
   }
   ```
+
+> Note: the underlying `products` table also includes additional fields such as `description`, `base_price`, `category_id`, and `slug`, but this endpoint currently returns only the product list fields above.
 
 ---
 

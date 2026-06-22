@@ -9,7 +9,7 @@ import { formatPrice, getAuthUser, getAuthToken } from "@/lib/utils";
 import Button from "@/components/ui/Button";
 import AuthPromptModal from "@/components/ui/AuthPromptModal";
 import { useAppStore } from "@/context/AppContext";
-import { cartApi } from "@/lib/api";
+
 
 interface PageProps {
   params: { id: string };
@@ -91,24 +91,10 @@ export default function ProductDetailPage({ params }: PageProps) {
     if (selectedDuration === "perDay") days = 1;
     if (selectedDuration === "perWeek") days = 7;
 
-    const added = addToCart(product.id, selectedSize, days);
+    const added = await addToCart(product.id, selectedSize, days);
     if (added) {
       setAddedSuccess(true);
       setTimeout(() => setAddedSuccess(false), 3000);
-
-      // Sync with backend cart API
-      const token = getAuthToken();
-      if (token) {
-        setCartSyncing(true);
-        try {
-          await cartApi.addToCart(Number(product.id), token);
-        } catch (err) {
-          // Item might already exist on backend — that's fine (409 conflict)
-          console.warn("Backend cart sync:", err);
-        } finally {
-          setCartSyncing(false);
-        }
-      }
     }
   }, [product, selectedSize, selectedDuration, addToCart]);
 

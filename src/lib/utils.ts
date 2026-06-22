@@ -61,17 +61,10 @@ export function getAuthToken(): string | null {
 
 export function setAuthToken(token: string): void {
   setCookie("wearloop_token", token, 1);
-  // Backwards compatibility
-  if (typeof window !== "undefined") {
-    localStorage.setItem("wearloop_token", token);
-  }
 }
 
 export function removeAuthToken(): void {
   removeCookie("wearloop_token");
-  if (typeof window !== "undefined") {
-    localStorage.removeItem("wearloop_token");
-  }
 }
 
 export interface AuthUser {
@@ -93,15 +86,10 @@ export function getAuthUser(): AuthUser | null {
 
 export function setAuthUser(user: AuthUser): void {
   setCookie("wearloop_user", JSON.stringify(user), 1);
-  if (typeof window !== "undefined") {
-    localStorage.setItem("wearloop_user", JSON.stringify(user));
-  }
 }
 
 export function removeAuthUser(): void {
   removeCookie("wearloop_user");
-  if (typeof window !== "undefined") {
-    localStorage.removeItem("wearloop_user");
-  }
 }
+
 
