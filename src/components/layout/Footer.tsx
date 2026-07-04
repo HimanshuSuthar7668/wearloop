@@ -101,6 +101,9 @@ export default function Footer() {
             <Link href="/terms" className="text-xs text-parchment/30 hover:text-parchment/60 transition-colors">
               Terms of Service
             </Link>
+            <Link href="/disclaimer" className="text-xs text-parchment/30 hover:text-parchment/60 transition-colors">
+              Disclaimer
+            </Link>
           </div>
         </div>
       </div>

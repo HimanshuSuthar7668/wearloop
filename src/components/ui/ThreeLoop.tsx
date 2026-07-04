@@ -147,6 +147,10 @@ export default function ThreeLoop() {
     // 6. Interactive State variables
     let mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
     let scrollRotation = { x: mesh.rotation.x, y: mesh.rotation.y, scale: 1.0 };
+    const dragRotation = { x: 0, y: 0 };
+    const pulse = { value: 1 };
+    let isDragging = false;
+    let previousPointer = { x: 0, y: 0 };
 
     // 7. Mouse Move Event Listener
     const onMouseMove = (e: MouseEvent) => {
@@ -158,6 +162,39 @@ export default function ThreeLoop() {
       mouse.targetY = y * 0.4;
     };
     window.addEventListener("mousemove", onMouseMove);
+
+    // 7b. Drag-to-rotate + click pulse interaction
+    const onPointerDown = (e: PointerEvent) => {
+      isDragging = true;
+      previousPointer = { x: e.clientX, y: e.clientY };
+
+      // Tactile scale punch
+      gsap.to(pulse, { value: 1.1, duration: 0.18, yoyo: true, repeat: 1, ease: "power2.out" });
+      // Brand-colored light flash on the material
+      gsap.to(material.color, {
+        r: 1.0,
+        g: 0.55,
+        b: 0.65,
+        duration: 0.25,
+        yoyo: true,
+        repeat: 1,
+        ease: "power2.out",
+      });
+    };
+    const onPointerMove = (e: PointerEvent) => {
+      if (!isDragging) return;
+      const deltaX = e.clientX - previousPointer.x;
+      const deltaY = e.clientY - previousPointer.y;
+      dragRotation.y += deltaX * 0.006;
+      dragRotation.x += deltaY * 0.006;
+      previousPointer = { x: e.clientX, y: e.clientY };
+    };
+    const onPointerUp = () => {
+      isDragging = false;
+    };
+    container.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
 
     // 8. GSAP ScrollTrigger Integration
     const scrollTween = gsap.to(scrollRotation, {
@@ -207,10 +244,10 @@ export default function ThreeLoop() {
       light3.position.y = Math.cos(time * 0.5 + 4) * 6;
       light3.position.z = Math.sin(time * 0.7) * 3;
 
-      // Auto rotation + scroll rotation + mouse tilt
-      mesh.rotation.x = scrollRotation.x + mouse.y + time * 0.08;
-      mesh.rotation.y = scrollRotation.y + mouse.x + time * 0.05;
-      mesh.scale.setScalar(scrollRotation.scale);
+      // Auto rotation + scroll rotation + mouse tilt + manual drag offset
+      mesh.rotation.x = scrollRotation.x + mouse.y + dragRotation.x + time * 0.08;
+      mesh.rotation.y = scrollRotation.y + mouse.x + dragRotation.y + time * 0.05;
+      mesh.scale.setScalar(scrollRotation.scale * pulse.value);
 
       renderer.render(scene, camera);
       animationFrameId = requestAnimationFrame(animate);
@@ -221,6 +258,9 @@ export default function ThreeLoop() {
     return () => {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("resize", handleResize);
+      container.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
       if (scrollTween.scrollTrigger) {
         scrollTween.scrollTrigger.kill();
       }

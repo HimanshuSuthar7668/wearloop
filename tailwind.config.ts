@@ -70,8 +70,9 @@ const config: Config = {
         3: "3px",
       },
       fontFamily: {
-        inter: ["Inter", "sans-serif"],
-        newsreader: ["Montserrat", "serif-serif"],
+        inter: ["var(--font-inter)", "sans-serif"],
+        newsreader: ["var(--font-montserrat)", "serif"],
+        body: ["var(--font-inter)", "sans-serif"],
       },
       fontSize: {
         xs: ["0.75rem", { lineHeight: "1rem" }], // 12px / 16px

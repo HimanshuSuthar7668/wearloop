@@ -12,6 +12,7 @@ const navLinks = [
   { href: "/shop", label: "Shop" },
   { href: "/how-it-works", label: "How It Works" },
   { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export default function Navbar() {

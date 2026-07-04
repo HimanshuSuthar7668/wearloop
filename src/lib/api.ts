@@ -41,6 +41,18 @@ export const authApi = {
       "/auth/login",
       { method: "POST", body: JSON.stringify({ email, password }) }
     ),
+
+  forgotPassword: (email: string) =>
+    request<{ message: string }>("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
+
+  resetPassword: (token: string, password: string, confirmPassword: string) =>
+    request<{ message: string }>("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify({ token, password, confirmPassword }),
+    }),
 };
 
 // Products
@@ -99,5 +111,11 @@ export const cartApi = {
     request<{ message: string }>("/cart", { method: "DELETE", token }),
 };
 
-export default { authApi, productsApi, ordersApi, paymentsApi, cartApi };
+// Contact
+export const contactApi = {
+  send: (data: { name: string; email: string; subject: string; message: string }) =>
+    request<{ message: string }>("/contact", { method: "POST", body: JSON.stringify(data) }),
+};
 
+const api = { authApi, productsApi, ordersApi, paymentsApi, cartApi, contactApi };
+export default api;

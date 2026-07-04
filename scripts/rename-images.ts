@@ -1,27 +1,14 @@
 import fs from "fs";
-import path from "path"; 
+import path from "path";
+
+const imagesDir = path.join(__dirname, "../public/images");
 
 const folders = [
-  {
-    folder: "../../public/images/men-suits",
-    prefix: "ms",
-  },
-  {
-    folder: "../../public/images/men-coats",
-    prefix: "mc",
-  },
-  {
-    folder: "../../public/images/men-hoodies",
-    prefix: "mh",
-  },
-  {
-    folder: "../../public/images/women-dresses",
-    prefix: "wd",
-  },
-  {
-    folder: "../../public/images/women-hoodies",
-    prefix: "wh",
-  },
+  { folder: path.join(imagesDir, "men-suits"), prefix: "ms" },
+  { folder: path.join(imagesDir, "men-coats"), prefix: "mc" },
+  { folder: path.join(imagesDir, "men-hoodies"), prefix: "mh" },
+  { folder: path.join(imagesDir, "women-dresses"), prefix: "wd" },
+  { folder: path.join(imagesDir, "women-hoodies"), prefix: "wh" },
 ];
 
 for (const { folder, prefix } of folders) {
