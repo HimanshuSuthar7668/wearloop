@@ -37,20 +37,27 @@ export default function HowItWorksSection() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      gsap.registerPlugin(ScrollTrigger);
+    }
+
     const ctx = gsap.context(() => {
       // 1. Header fade-in
-      gsap.from(".how-it-works-header > *", {
-        opacity: 0,
-        y: 30,
-        stagger: 0.15,
-        duration: 0.8,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: ".how-it-works-header",
-          start: "top 85%",
-          toggleActions: "play none none none",
-        },
-      });
+      gsap.fromTo(".how-it-works-header > *", 
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.15,
+          duration: 0.8,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: ".how-it-works-header",
+            start: "top 85%",
+            toggleActions: "play none none none",
+          },
+        }
+      );
 
       // 2. Connector line drawing
       gsap.to(".step-connector-progress", {
@@ -65,22 +72,33 @@ export default function HowItWorksSection() {
       });
 
       // 3. Step cards stagger reveal
-      gsap.from(".step-card", {
-        opacity: 0,
-        y: 45,
-        scale: 0.96,
-        stagger: 0.2,
-        duration: 0.8,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: ".steps-container",
-          start: "top 75%",
-          toggleActions: "play none none none",
-        },
-      });
+      gsap.fromTo(".step-card",
+        { opacity: 0, y: 45, scale: 0.96 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          stagger: 0.2,
+          duration: 0.8,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: ".steps-container",
+            start: "top 75%",
+            toggleActions: "play none none none",
+          },
+        }
+      );
     }, containerRef);
 
-    return () => ctx.revert();
+    // Refresh ScrollTrigger to calculate correct positions after mounting
+    const refreshTimer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 100);
+
+    return () => {
+      ctx.revert();
+      clearTimeout(refreshTimer);
+    };
   }, []);
 
   return (

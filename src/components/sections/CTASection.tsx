@@ -14,37 +14,55 @@ export default function CTASection() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      gsap.registerPlugin(ScrollTrigger);
+    }
+
     const ctx = gsap.context(() => {
       // 1. Scale-up and fade-in the CTA container card
-      gsap.from(".cta-card", {
-        opacity: 0,
-        y: 40,
-        scale: 0.96,
-        duration: 1.0,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: ".cta-card",
-          start: "top 85%",
-          toggleActions: "play none none none",
-        },
-      });
+      gsap.fromTo(".cta-card", 
+        { opacity: 0, y: 40, scale: 0.96 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 1.0,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: ".cta-card",
+            start: "top 85%",
+            toggleActions: "play none none none",
+          },
+        }
+      );
 
       // 2. Stagger text elements inside the card
-      gsap.from(".cta-content > *", {
-        opacity: 0,
-        y: 20,
-        stagger: 0.15,
-        duration: 0.8,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: ".cta-card",
-          start: "top 80%",
-          toggleActions: "play none none none",
-        },
-      });
+      gsap.fromTo(".cta-content > *", 
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.15,
+          duration: 0.8,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: ".cta-card",
+            start: "top 80%",
+            toggleActions: "play none none none",
+          },
+        }
+      );
     }, containerRef);
 
-    return () => ctx.revert();
+    // Refresh ScrollTrigger to calculate correct positions after mounting
+    const refreshTimer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 100);
+
+    return () => {
+      ctx.revert();
+      clearTimeout(refreshTimer);
+    };
   }, []);
 
   return (

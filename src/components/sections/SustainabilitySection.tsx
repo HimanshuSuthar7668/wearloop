@@ -35,20 +35,27 @@ export default function SustainabilitySection() {
   const counterRef = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      gsap.registerPlugin(ScrollTrigger);
+    }
+
     const ctx = gsap.context(() => {
       // 1. Animate left section content
-      gsap.from(".sustainability-left > *", {
-        opacity: 0,
-        y: 35,
-        stagger: 0.15,
-        duration: 0.8,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: ".sustainability-left",
-          start: "top 85%",
-          toggleActions: "play none none none",
-        },
-      });
+      gsap.fromTo(".sustainability-left > *", 
+        { opacity: 0, y: 35 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.15,
+          duration: 0.8,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: ".sustainability-left",
+            start: "top 85%",
+            toggleActions: "play none none none",
+          },
+        }
+      );
 
       // 2. Count up 73% stat
       const statVal = { value: 0 };
@@ -69,21 +76,32 @@ export default function SustainabilitySection() {
       });
 
       // 3. Animate right section pillars
-      gsap.from(".pillar-card", {
-        opacity: 0,
-        x: 40,
-        stagger: 0.18,
-        duration: 0.8,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: ".pillars-container",
-          start: "top 85%",
-          toggleActions: "play none none none",
-        },
-      });
+      gsap.fromTo(".pillar-card",
+        { opacity: 0, x: 40 },
+        {
+          opacity: 1,
+          x: 0,
+          stagger: 0.18,
+          duration: 0.8,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: ".pillars-container",
+            start: "top 85%",
+            toggleActions: "play none none none",
+          },
+        }
+      );
     }, containerRef);
 
-    return () => ctx.revert();
+    // Refresh ScrollTrigger to calculate correct positions after mounting
+    const refreshTimer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 100);
+
+    return () => {
+      ctx.revert();
+      clearTimeout(refreshTimer);
+    };
   }, []);
 
   return (

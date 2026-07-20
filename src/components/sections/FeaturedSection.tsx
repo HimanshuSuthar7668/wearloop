@@ -16,49 +16,70 @@ export default function FeaturedSection() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      gsap.registerPlugin(ScrollTrigger);
+    }
+
     const ctx = gsap.context(() => {
       // Animate header elements
-      gsap.from(".featured-header-text > *", {
-        opacity: 0,
-        y: 30,
-        stagger: 0.15,
-        duration: 0.8,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: ".featured-header",
-          start: "top 85%",
-          toggleActions: "play none none none",
-        },
-      });
+      gsap.fromTo(".featured-header-text > *", 
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.15,
+          duration: 0.8,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: ".featured-header",
+            start: "top 85%",
+            toggleActions: "play none none none",
+          },
+        }
+      );
 
-      gsap.from(".featured-header-link", {
-        opacity: 0,
-        x: 20,
-        duration: 0.8,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: ".featured-header",
-          start: "top 85%",
-          toggleActions: "play none none none",
-        },
-      });
+      gsap.fromTo(".featured-header-link", 
+        { opacity: 0, x: 20 },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.8,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: ".featured-header",
+            start: "top 85%",
+            toggleActions: "play none none none",
+          },
+        }
+      );
 
       // Stagger product cards
-      gsap.from(".featured-card", {
-        opacity: 0,
-        y: 50,
-        stagger: 0.15,
-        duration: 1.0,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: ".featured-grid",
-          start: "top 80%",
-          toggleActions: "play none none none",
-        },
-      });
+      gsap.fromTo(".featured-card", 
+        { opacity: 0, y: 50 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.15,
+          duration: 1.0,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: ".featured-grid",
+            start: "top 80%",
+            toggleActions: "play none none none",
+          },
+        }
+      );
     }, containerRef);
 
-    return () => ctx.revert();
+    // Refresh ScrollTrigger to calculate correct positions after mounting
+    const refreshTimer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 100);
+
+    return () => {
+      ctx.revert();
+      clearTimeout(refreshTimer);
+    };
   }, []);
 
   return (
