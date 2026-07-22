@@ -43,7 +43,8 @@ export default function HowItWorksSection() {
 
     const ctx = gsap.context(() => {
       // 1. Header fade-in
-      gsap.fromTo(".how-it-works-header > *", 
+      gsap.fromTo(
+        ".how-it-works-header > *",
         { opacity: 0, y: 30 },
         {
           opacity: 1,
@@ -56,7 +57,7 @@ export default function HowItWorksSection() {
             start: "top 85%",
             toggleActions: "play none none none",
           },
-        }
+        },
       );
 
       // 2. Connector line drawing
@@ -72,7 +73,8 @@ export default function HowItWorksSection() {
       });
 
       // 3. Step cards stagger reveal
-      gsap.fromTo(".step-card",
+      gsap.fromTo(
+        ".step-card",
         { opacity: 0, y: 45, scale: 0.96 },
         {
           opacity: 1,
@@ -86,7 +88,7 @@ export default function HowItWorksSection() {
             start: "top 75%",
             toggleActions: "play none none none",
           },
-        }
+        },
       );
     }, containerRef);
 
@@ -102,10 +104,13 @@ export default function HowItWorksSection() {
   }, []);
 
   return (
-    <section ref={containerRef} className="py-24 bg-charcoal-light overflow-hidden">
+    <section
+      ref={containerRef}
+      className="py-24 bg-charcoal-light overflow-hidden"
+    >
       <div className="max-w-7xl mx-auto px-6 md:px-10">
         <div className="text-center mb-16 how-it-works-header">
-          <p className="text-xs uppercase tracking-[0.25em] text-[#c9a898] mb-3">
+          <p className="text-xs uppercase tracking-[0.25em] text-rose mb-3">
             Simple by design
           </p>
           <h2 className="font-display text-4xl md:text-5xl font-bold text-parchment">
@@ -115,30 +120,32 @@ export default function HowItWorksSection() {
 
         <div className="grid md:grid-cols-3 gap-8 md:gap-12 relative steps-container">
           {/* Connector line (desktop only) */}
-          <div className="hidden md:block absolute top-8 left-[calc(16.67%)] right-[calc(16.67%)] h-[2px] bg-parchment/10 overflow-hidden rounded-full">
-            <div className="step-connector-progress w-full h-full bg-gradient-to-r from-rose via-[#c9a898] to-sage origin-left scale-x-0" />
+          <div className="hidden md:block absolute -top-10 left-[calc(16.67%)] right-[calc(16.67%)] h-[2px] bg-parchment/10 overflow-hidden rounded-full">
+            <div className="step-connector-progress w-full h-full bg-gradient-to-r from-rose via-rose to-sage origin-left scale-x-0" />
           </div>
 
           {steps.map(({ icon: Icon, number, title, description }) => (
             <div
               key={number}
-              className="relative flex flex-col items-start gap-5 p-8 rounded-2xl border border-parchment/8 hover:border-[#c9a898]/40 transition-all duration-300 bg-charcoal/40 step-card group"
+              className="relative flex flex-col items-start gap-5 p-8 rounded-2xl border border-parchment/8 hover:border-rose/40 transition-all duration-300 bg-charcoal/40 step-card group"
             >
               {/* Step number */}
-              <span className="absolute top-6 right-6 font-display text-5xl font-bold text-parchment/[0.04] group-hover:text-[#c9a898]/10 group-hover:scale-105 transition-all duration-300 select-none">
+              <span className="absolute top-6 right-6 font-display text-5xl font-bold text-parchment/[0.04] group-hover:text-rose/10 group-hover:scale-105 transition-all duration-300 select-none">
                 {number}
               </span>
 
               {/* Icon */}
               <div className="w-12 h-12 rounded-xl bg-rose/10 border border-rose/20 flex items-center justify-center group-hover:bg-rose/20 group-hover:border-rose/40 transition-colors duration-300">
-                <Icon size={20} className="text-[#c9a898]" />
+                <Icon size={20} className="text-rose" />
               </div>
 
               <div>
                 <h3 className="font-display text-xl font-semibold text-parchment mb-2 group-hover:text-parchment transition-colors duration-300">
                   {title}
                 </h3>
-                <p className="text-sm text-parchment/50 leading-relaxed group-hover:text-parchment/70 transition-colors duration-300">{description}</p>
+                <p className="text-sm text-parchment/50 leading-relaxed group-hover:text-parchment/70 transition-colors duration-300">
+                  {description}
+                </p>
               </div>
             </div>
           ))}

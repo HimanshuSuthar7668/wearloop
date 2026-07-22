@@ -36,15 +36,42 @@
 @layer base {
   * {
     box-sizing: border-box;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+
+  :root {
+    /* Light Theme (Default) */
+    --charcoal: 245 240 232;
+    --charcoal-light: 232 224 208;
+    --parchment: 26 26 46;
+    --parchment-dark: 37 37 64;
+    --rose: 201 168 152;
+    --rose-dark: 184 144 126;
+    --sage: 138 158 140;
+    --sage-dark: 107 125 109;
+    --mist: 212 207 200;
   }
 
   html {
     scroll-behavior: smooth;
+    background-color: rgb(var(--charcoal));
+    color: rgb(var(--parchment));
+  }
+
+  html.dark {
+    /* Dark Theme */
+    --charcoal: 26 26 46;
+    --charcoal-light: 37 37 64;
+    --parchment: 245 240 232;
+    --parchment-dark: 232 224 208;
+    --rose: 201 168 152;
+    --rose-dark: 184 144 126;
+    --sage: 138 158 140;
+    --sage-dark: 107 125 109;
+    --mist: 212 207 200;
   }
 
   body {
-    background-color: #1a1a2e;
-    color: #fff;
     font-family: var(--font-montserrat);
     font-weight: 400;
     -webkit-font-smoothing: antialiased;

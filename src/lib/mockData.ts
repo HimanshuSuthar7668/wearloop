@@ -8,7 +8,7 @@ export const mockProducts: Product[] = [
     category: "dress",
     occasion: "party",
     images: [
-      "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=600&q=80",
+      "/images/women-dresses/wd_3.jpg",
     ],
     rentalPrice: { perDay: 499, per3Days: 1199, perWeek: 1999 },
     retailPrice: 12000,
@@ -27,7 +27,7 @@ export const mockProducts: Product[] = [
     category: "dress",
     occasion: "work",
     images: [
-      "https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=600&q=80",
+      "/images/women-dresses/wd_4.jpg",
     ],
     rentalPrice: { perDay: 599, per3Days: 1499, perWeek: 2499 },
     retailPrice: 18000,
@@ -46,7 +46,7 @@ export const mockProducts: Product[] = [
     category: "dress",
     occasion: "wedding",
     images: [
-      "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=600&q=80",
+      "/images/women-dresses/wd_5.jpg",
     ],
     rentalPrice: { perDay: 799, per3Days: 1999, perWeek: 3299 },
     retailPrice: 28000,
@@ -65,7 +65,7 @@ export const mockProducts: Product[] = [
     category: "outerwear",
     occasion: "casual",
     images: [
-      "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80",
+      "/images/men-coats/mc_3.jpg",
     ],
     rentalPrice: { perDay: 699, per3Days: 1699, perWeek: 2799 },
     retailPrice: 45000,
@@ -84,7 +84,7 @@ export const mockProducts: Product[] = [
     category: "suit",
     occasion: "formal",
     images: [
-      "https://images.unsplash.com/photo-1594938298603-c8148c4b4ae5?w=600&q=80",
+      "/images/men-suits/ms_3.jpg",
     ],
     rentalPrice: { perDay: 649, per3Days: 1549, perWeek: 2599 },
     retailPrice: 22000,
@@ -103,7 +103,7 @@ export const mockProducts: Product[] = [
     category: "dress",
     occasion: "party",
     images: [
-      "https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=600&q=80",
+      "/images/women-dresses/wd_6.jpg",
     ],
     rentalPrice: { perDay: 449, per3Days: 999, perWeek: 1699 },
     retailPrice: 9000,
@@ -122,7 +122,7 @@ export const mockProducts: Product[] = [
     category: "bottom",
     occasion: "casual",
     images: [
-      "https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=600&q=80",
+      "/images/women-dresses/wd_7.jpg",
     ],
     rentalPrice: { perDay: 349, per3Days: 849, perWeek: 1399 },
     retailPrice: 14000,
@@ -141,7 +141,7 @@ export const mockProducts: Product[] = [
     category: "dress",
     occasion: "formal",
     images: [
-      "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=600&q=80",
+      "/images/women-dresses/wd_8.jpg",
     ],
     rentalPrice: { perDay: 999, per3Days: 2499, perWeek: 3999 },
     retailPrice: 55000,

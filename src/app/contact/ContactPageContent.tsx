@@ -4,7 +4,16 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Mail, Phone, MapPin, Clock, Send, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Clock,
+  Send,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
 import { contactApi } from "@/lib/api";
 import Button from "@/components/ui/Button";
 
@@ -16,24 +25,18 @@ const contactInfo = [
   {
     icon: Mail,
     title: "Email us",
-    detail: "hello@wearloop.in",
+    detail: "himanshu.suthar.dev@gmail.com",
     sub: "We reply within 24 hours",
-    href: "mailto:hello@wearloop.in",
+    href: "mailto:himanshu.suthar.dev@gmail.com",
   },
   {
     icon: Phone,
     title: "Call us",
-    detail: "+91 80 4567 8900",
+    detail: "+91 70 1485 0144",
     sub: "Mon–Sat, 10am–7pm IST",
-    href: "tel:+918045678900",
+    href: "tel:+917014850144",
   },
-  {
-    icon: MapPin,
-    title: "Visit us",
-    detail: "Koramangala, Bengaluru",
-    sub: "Karnataka, India 560034",
-    href: "https://maps.google.com",
-  },
+
   {
     icon: Clock,
     title: "Support hours",
@@ -44,11 +47,9 @@ const contactInfo = [
 ];
 
 const topics = [
-  { value: "order", label: "Order support" },
-  { value: "sizing", label: "Sizing & fit help" },
-  { value: "partnership", label: "Brand partnership" },
-  { value: "press", label: "Press & media" },
-  { value: "other", label: "Something else" },
+  { value: "order", label: "Hiring For Job" },
+  { value: "sizing", label: "Searching Frontend Dev." },
+  { value: "partnership", label: "Need Fullstack Dev." },
 ];
 
 interface FormState {
@@ -58,7 +59,12 @@ interface FormState {
   message: string;
 }
 
-const emptyForm: FormState = { name: "", email: "", subject: "order", message: "" };
+const emptyForm: FormState = {
+  name: "",
+  email: "",
+  subject: "order",
+  message: "",
+};
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -66,8 +72,12 @@ export default function ContactPageContent() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [form, setForm] = useState<FormState>(emptyForm);
-  const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
-  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof FormState, string>>
+  >({});
+  const [status, setStatus] = useState<
+    "idle" | "submitting" | "success" | "error"
+  >("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
@@ -109,7 +119,10 @@ export default function ContactPageContent() {
     return () => ctx.revert();
   }, []);
 
-  const updateField = <K extends keyof FormState>(key: K, value: FormState[K]) => {
+  const updateField = <K extends keyof FormState>(
+    key: K,
+    value: FormState[K],
+  ) => {
     setForm((prev) => ({ ...prev, [key]: value }));
     setErrors((prev) => ({ ...prev, [key]: undefined }));
   };
@@ -119,9 +132,11 @@ export default function ContactPageContent() {
 
     if (!form.name.trim()) nextErrors.name = "Please tell us your name.";
     if (!form.email.trim()) nextErrors.email = "Email is required.";
-    else if (!EMAIL_RE.test(form.email)) nextErrors.email = "Enter a valid email address.";
+    else if (!EMAIL_RE.test(form.email))
+      nextErrors.email = "Enter a valid email address.";
     if (!form.message.trim()) nextErrors.message = "Please add a message.";
-    else if (form.message.trim().length < 10) nextErrors.message = "Message should be at least 10 characters.";
+    else if (form.message.trim().length < 10)
+      nextErrors.message = "Message should be at least 10 characters.";
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -149,13 +164,19 @@ export default function ContactPageContent() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || "Failed to send your message. Please try again.");
+        throw new Error(
+          data.message || "Failed to send your message. Please try again.",
+        );
       }
 
       setStatus("success");
       setForm(emptyForm);
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setErrorMessage(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.",
+      );
       setStatus("error");
     }
   }
@@ -164,14 +185,17 @@ export default function ContactPageContent() {
     <div ref={containerRef} className="min-h-screen pt-20">
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 md:px-10 pt-16 pb-12 text-center contact-hero">
-        <p className="text-xs uppercase tracking-[0.25em] text-[#c9a898] mb-4">We&apos;d love to hear from you</p>
+        <p className="text-xs uppercase tracking-[0.25em] text-[#c9a898] mb-4">
+          We&apos;d love to hear from you
+        </p>
         <h1 className="font-display text-5xl md:text-6xl font-bold text-parchment mb-6 text-balance">
           Get in
           <br />
           <em className="not-italic text-[#c9a898]">touch with us.</em>
         </h1>
         <p className="text-parchment/50 text-lg leading-relaxed max-w-xl mx-auto">
-          Questions about an order, a piece, or a partnership? Our team usually replies within a day.
+          Questions about an order, a piece, or a partnership? Our team usually
+          replies within a day.
         </p>
       </section>
 
@@ -189,8 +213,12 @@ export default function ContactPageContent() {
                     <Icon size={18} className="text-[#c9a898]" />
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-wider text-parchment/40 font-semibold">{title}</p>
-                    <p className="text-sm font-semibold text-parchment mt-1">{detail}</p>
+                    <p className="text-xs uppercase tracking-wider text-parchment/40 font-semibold">
+                      {title}
+                    </p>
+                    <p className="text-sm font-semibold text-parchment mt-1">
+                      {detail}
+                    </p>
                     <p className="text-xs text-parchment/40 mt-0.5">{sub}</p>
                   </div>
                 </>
@@ -223,17 +251,28 @@ export default function ContactPageContent() {
                     <CheckCircle2 size={26} />
                   </div>
                   <div>
-                    <h2 className="font-display text-xl font-bold text-parchment">Message sent!</h2>
+                    <h2 className="font-display text-xl font-bold text-parchment">
+                      Message sent!
+                    </h2>
                     <p className="text-sm text-parchment/50 mt-1.5 max-w-sm">
-                      Thanks for reaching out — a member of the WearLoop team will get back to you within 24 hours.
+                      Thanks for reaching out — a member of the WearLoop team
+                      will get back to you within 24 hours.
                     </p>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => setStatus("idle")}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setStatus("idle")}
+                  >
                     Send another message
                   </Button>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+                <form
+                  onSubmit={handleSubmit}
+                  className="flex flex-col gap-4"
+                  noValidate
+                >
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-xs text-parchment/50 uppercase tracking-wider block mb-1.5">
@@ -246,11 +285,17 @@ export default function ContactPageContent() {
                         placeholder="Your name"
                         className="w-full bg-charcoal border border-parchment/10 focus:border-rose/60 text-parchment placeholder-parchment/25 rounded-lg px-4 py-3 text-sm outline-none transition-colors"
                       />
-                      {errors.name && <p className="text-xs text-red-400 mt-1.5">{errors.name}</p>}
+                      {errors.name && (
+                        <p className="text-xs text-red-400 mt-1.5">
+                          {errors.name}
+                        </p>
+                      )}
                     </div>
 
                     <div>
-                      <label className="text-xs text-parchment/50 uppercase tracking-wider block mb-1.5">Email</label>
+                      <label className="text-xs text-parchment/50 uppercase tracking-wider block mb-1.5">
+                        Email
+                      </label>
                       <input
                         type="email"
                         value={form.email}
@@ -258,7 +303,11 @@ export default function ContactPageContent() {
                         placeholder="you@example.com"
                         className="w-full bg-charcoal border border-parchment/10 focus:border-rose/60 text-parchment placeholder-parchment/25 rounded-lg px-4 py-3 text-sm outline-none transition-colors"
                       />
-                      {errors.email && <p className="text-xs text-red-400 mt-1.5">{errors.email}</p>}
+                      {errors.email && (
+                        <p className="text-xs text-red-400 mt-1.5">
+                          {errors.email}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -280,7 +329,9 @@ export default function ContactPageContent() {
                   </div>
 
                   <div>
-                    <label className="text-xs text-parchment/50 uppercase tracking-wider block mb-1.5">Message</label>
+                    <label className="text-xs text-parchment/50 uppercase tracking-wider block mb-1.5">
+                      Message
+                    </label>
                     <textarea
                       value={form.message}
                       onChange={(e) => updateField("message", e.target.value)}
@@ -288,7 +339,11 @@ export default function ContactPageContent() {
                       placeholder="Tell us how we can help..."
                       className="w-full bg-charcoal border border-parchment/10 focus:border-rose/60 text-parchment placeholder-parchment/25 rounded-lg px-4 py-3 text-sm outline-none transition-colors resize-none"
                     />
-                    {errors.message && <p className="text-xs text-red-400 mt-1.5">{errors.message}</p>}
+                    {errors.message && (
+                      <p className="text-xs text-red-400 mt-1.5">
+                        {errors.message}
+                      </p>
+                    )}
                   </div>
 
                   {status === "error" && (
@@ -327,7 +382,9 @@ export default function ContactPageContent() {
       {/* Quick links */}
       <section className="bg-charcoal-light border-t border-parchment/10 py-16">
         <div className="max-w-5xl mx-auto px-6 md:px-10 text-center">
-          <h2 className="font-display text-2xl font-bold text-parchment mb-3">Looking for something specific?</h2>
+          <h2 className="font-display text-2xl font-bold text-parchment mb-3">
+            Looking for something specific?
+          </h2>
           <p className="text-sm text-parchment/50 mb-8 max-w-md mx-auto">
             These might get you an answer faster than waiting on a reply.
           </p>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ShoppingBag, Menu, X, User, Search } from "lucide-react";
+import { ShoppingBag, Menu, X, User, Search, Sun, Moon, Heart } from "lucide-react";
 import Image from "next/image";
 import logo from "@/../public/images/wearloop-logo.svg";
 import { getAuthUser, removeAuthToken, removeAuthUser } from "@/lib/utils";
@@ -19,17 +19,35 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
-  const { cart } = useAppStore();
+  const [isDark, setIsDark] = useState(false);
+  const { cart, favourites } = useAppStore();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
+    onScroll(); // sync immediately on mount (handles reload mid-page)
     window.addEventListener("scroll", onScroll);
     
     // Check auth cookie
     setUser(getAuthUser());
+
+    // Initialize theme state
+    setIsDark(document.documentElement.classList.contains("dark"));
     
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const toggleTheme = () => {
+    const root = document.documentElement;
+    if (isDark) {
+      root.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+      setIsDark(false);
+    } else {
+      root.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+      setIsDark(true);
+    }
+  };
 
   return (
     <header
@@ -60,6 +78,13 @@ export default function Navbar() {
 
         {/* Actions */}
         <div className="flex items-center gap-3">
+          <button
+            onClick={toggleTheme}
+            className="p-2 text-parchment/60 hover:text-parchment transition-colors"
+            aria-label="Toggle Theme"
+          >
+            {isDark ? <Moon size={18} /> : <Sun size={18} />}
+          </button>
           <Link
             href="/shop"
             className="hidden md:flex p-2 text-parchment/60 hover:text-parchment transition-colors"
@@ -76,6 +101,18 @@ export default function Navbar() {
             {user && (
               <span className="text-xs font-medium max-w-[80px] truncate text-parchment/80">
                 {user.name.split(" ")[0]}
+              </span>
+            )}
+          </Link>
+          <Link
+            href="/favourites"
+            className="relative p-2 text-parchment/60 hover:text-parchment transition-colors"
+            aria-label="Favourites"
+          >
+            <Heart size={18} />
+            {favourites.length > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-rose text-charcoal text-[10px] font-semibold rounded-full flex items-center justify-center">
+                {favourites.length}
               </span>
             )}
           </Link>

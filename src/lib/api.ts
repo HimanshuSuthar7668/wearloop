@@ -111,11 +111,32 @@ export const cartApi = {
     request<{ message: string }>("/cart", { method: "DELETE", token }),
 };
 
+// Favourites
+export const favouritesApi = {
+  add: (productId: number, token: string) =>
+    request<{ id: number; user_id: number; product_id: number; created_at: string }>(
+      "/favourites",
+      { method: "POST", body: JSON.stringify({ productId }), token }
+    ),
+
+  check: (productId: number, token: string) =>
+    request<{ inFavourites: boolean }>(`/favourites/check/${productId}`, { token }),
+
+  getAll: (token: string) =>
+    request<{ id: number; user_id: number; product_id: number; created_at: string }[]>(
+      "/favourites",
+      { token }
+    ),
+
+  remove: (productId: number, token: string) =>
+    request<{ message: string }>(`/favourites/${productId}`, { method: "DELETE", token }),
+};
+
 // Contact
 export const contactApi = {
   send: (data: { name: string; email: string; subject: string; message: string }) =>
     request<{ message: string }>("/contact", { method: "POST", body: JSON.stringify(data) }),
 };
 
-const api = { authApi, productsApi, ordersApi, paymentsApi, cartApi, contactApi };
+const api = { authApi, productsApi, ordersApi, paymentsApi, cartApi, favouritesApi, contactApi };
 export default api;

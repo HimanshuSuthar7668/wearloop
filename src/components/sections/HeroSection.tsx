@@ -56,7 +56,7 @@ export default function HeroSection() {
           <div className="flex flex-col gap-6 hero-text-content">
             <div className="flex items-center gap-3 hero-label">
               <div className="w-8 h-px bg-rose" />
-              <span className="text-xs uppercase tracking-[0.25em] text-[#c9a898] font-medium">
+              <span className="text-xs uppercase tracking-[0.25em] text-rose font-medium">
                 Circular Fashion
               </span>
             </div>
@@ -64,7 +64,7 @@ export default function HeroSection() {
             <h1 className="font-display hero-title text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05] text-parchment text-balance">
               Your wardrobe,
               <br />
-              <em className="text-[#c9a898]">infinitely</em>
+              <em className="text-rose">infinitely</em>
               <br />
               renewed.
             </h1>

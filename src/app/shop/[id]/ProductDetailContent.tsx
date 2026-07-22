@@ -17,12 +17,12 @@ interface ProductDetailContentProps {
 
 export default function ProductDetailContent({ productId }: ProductDetailContentProps) {
   const router = useRouter();
-  const { products, cart, addToCart, deleteProduct, updateProduct } = useAppStore();
+  const { products, cart, addToCart, deleteProduct, updateProduct, favourites, addToFavourites, removeFromFavourites } = useAppStore();
   const product = products.find((p) => p.id === productId);
 
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedDuration, setSelectedDuration] = useState<"perDay" | "per3Days" | "perWeek">("per3Days");
-  const [wished, setWished] = useState(false);
+  const isFavourited = favourites.includes(productId);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [addedSuccess, setAddedSuccess] = useState(false);
@@ -190,12 +190,13 @@ export default function ProductDetailContent({ productId }: ProductDetailContent
               priority
             />
             <button
-              onClick={() => setWished(!wished)}
+              onClick={() => isFavourited ? removeFromFavourites(productId) : addToFavourites(productId)}
               className="absolute top-5 right-5 p-3 bg-charcoal/60 backdrop-blur-sm rounded-full hover:bg-charcoal/80 transition-colors"
+              aria-label={isFavourited ? "Remove from favourites" : "Add to favourites"}
             >
               <Heart
                 size={18}
-                className={wished ? "fill-rose text-[#c9a898]" : "text-parchment/60"}
+                className={isFavourited ? "fill-rose text-[#c9a898]" : "text-parchment/60"}
               />
             </button>
           </div>

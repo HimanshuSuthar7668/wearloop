@@ -2,10 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Star, Heart } from "lucide-react";
-import { useState } from "react";
+import { Star, Heart, ShoppingCart } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Product } from "@/types";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, getAuthUser } from "@/lib/utils";
+import { useAppStore } from "@/context/AppContext";
+import { useRouter } from "next/navigation";
 
 interface ProductCardProps {
   product: Product;
@@ -14,6 +16,48 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const [wished, setWished] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { cart, addToCart, removeFromCart, favourites, addToFavourites, removeFromFavourites } = useAppStore();
+
+  const router = useRouter();
+
+  useEffect(() => {
+    const user = getAuthUser();
+    setIsLoggedIn(!!user);
+  }, []);
+
+  const inCart = cart.some((item) => item.productId === product.id);
+  const isFavourited = favourites.includes(product.id);
+
+  const handleToggleCart = async (e: React.MouseEvent) => {
+    if (!isLoggedIn) {
+      router.push("/auth");
+      return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+    if (inCart) {
+      await removeFromCart(product.id);
+    } else {
+      const defaultSize =
+        product.sizes && product.sizes.length > 0 ? product.sizes[0] : "M";
+      await addToCart(product.id, defaultSize, 3);
+    }
+  };
+
+  const handleToggleFavourite = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isLoggedIn) {
+      router.push("/auth?redirect=/favourites");
+      return;
+    }
+    if (isFavourited) {
+      await removeFromFavourites(product.id);
+    } else {
+      await addToFavourites(product.id);
+    }
+  };
 
   return (
     <div
@@ -61,17 +105,33 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
         )}
 
-        {/* Wishlist */}
-        <button
-          onClick={() => setWished(!wished)}
-          className="absolute top-3 right-3 p-1.5 bg-charcoal/60 backdrop-blur-sm rounded-full hover:bg-charcoal/80 transition-colors"
-          aria-label="Add to wishlist"
-        >
-          <Heart
-            size={14}
-            className={wished ? "fill-rose text-[#c9a898]" : "text-parchment/70"}
-          />
-        </button>
+        {/* Top Right Action Buttons */}
+        <div className="absolute top-3 right-3 flex flex-col gap-2">
+          {/* Favourite */}
+          <button
+            onClick={handleToggleFavourite}
+            className="p-1.5 bg-charcoal/60 backdrop-blur-sm rounded-full hover:bg-charcoal/80 transition-colors"
+            aria-label={isFavourited ? "Remove from favourites" : "Add to favourites"}
+          >
+            <Heart
+              size={14}
+              className={isFavourited ? "fill-rose text-rose" : "text-parchment/70"}
+            />
+          </button>
+          {/* Add to Cart */}
+          <button
+            onClick={handleToggleCart}
+            className="p-1.5 bg-charcoal/60 backdrop-blur-sm rounded-full hover:bg-charcoal/80 transition-colors"
+            aria-label={inCart ? "Remove from cart" : "Add to cart"}
+          >
+            <ShoppingCart
+              size={14}
+              className={
+                inCart ? "fill-parchment text-parchment" : "text-parchment/70"
+              }
+            />
+          </button>
+        </div>
       </div>
 
       {/* Info */}

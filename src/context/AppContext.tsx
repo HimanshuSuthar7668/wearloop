@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Product } from "@/types";
 import { mockProducts as initialMockProducts } from "@/lib/mockData";
-import { productsApi, cartApi } from "@/lib/api";
+import { productsApi, cartApi, favouritesApi } from "@/lib/api";
 import { getAuthToken } from "@/lib/utils";
 
 export interface CartItem {
@@ -15,9 +15,12 @@ export interface CartItem {
 interface AppContextType {
   products: Product[];
   cart: CartItem[];
+  favourites: string[]; // array of productIds
   addToCart: (productId: string, size: string, days: number) => Promise<boolean>;
   removeFromCart: (productId: string) => Promise<void>;
   clearCart: () => Promise<void>;
+  addToFavourites: (productId: string) => Promise<boolean>;
+  removeFromFavourites: (productId: string) => Promise<void>;
   addProduct: (product: Omit<Product, "id" | "rating" | "reviewCount" | "available">) => void;
   updateProduct: (id: string, updatedFields: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
@@ -28,9 +31,10 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [favourites, setFavourites] = useState<string[]>([]);
   const [loaded, setLoaded] = useState(false);
 
-  // Initialize products and cart from backend on mount
+  // Initialize products, cart, and favourites from backend on mount
   useEffect(() => {
     const initApp = async () => {
       // 1. Fetch products
@@ -45,24 +49,37 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       setProducts(activeProducts);
 
-      // 2. Fetch cart if authorized
+      // 2. Fetch cart and favourites if authorized
       const token = getAuthToken();
       let activeCart: CartItem[] = [];
+      let activeFavourites: string[] = [];
+
       if (token) {
         try {
           const backendCart = await cartApi.getAll(token);
           if (backendCart && Array.isArray(backendCart)) {
             activeCart = backendCart.map((item) => ({
               productId: String(item.product_id),
-              size: "M", // default size as db doesn't store size
-              days: 3,   // default rental days
+              size: "M",
+              days: 3,
             }));
           }
         } catch (err) {
           console.error("Failed to load cart from backend API:", err);
         }
+
+        try {
+          const backendFavourites = await favouritesApi.getAll(token);
+          if (backendFavourites && Array.isArray(backendFavourites)) {
+            activeFavourites = backendFavourites.map((item) => String(item.product_id));
+          }
+        } catch (err) {
+          console.error("Failed to load favourites from backend API:", err);
+        }
       }
+
       setCart(activeCart);
+      setFavourites(activeFavourites);
       setLoaded(true);
     };
 
@@ -73,7 +90,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const token = getAuthToken();
     if (!token) return false;
 
-    // Check if already exists in state
     const alreadyExists = cart.some((item) => item.productId === productId);
     if (alreadyExists) return false;
 
@@ -114,10 +130,40 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const addToFavourites = async (productId: string): Promise<boolean> => {
+    const token = getAuthToken();
+    if (!token) return false;
+
+    const alreadyExists = favourites.includes(productId);
+    if (alreadyExists) return false;
+
+    setFavourites([...favourites, productId]);
+
+    try {
+      await favouritesApi.add(Number(productId), token);
+    } catch (err) {
+      console.error("Failed to add to backend favourites:", err);
+    }
+    return true;
+  };
+
+  const removeFromFavourites = async (productId: string) => {
+    const token = getAuthToken();
+    setFavourites(favourites.filter((id) => id !== productId));
+
+    if (token) {
+      try {
+        await favouritesApi.remove(Number(productId), token);
+      } catch (err) {
+        console.error("Failed to remove from backend favourites:", err);
+      }
+    }
+  };
+
   const addProduct = (newProdData: Omit<Product, "id" | "rating" | "reviewCount" | "available">) => {
     const newId = String(
-      products.length > 0 
-        ? Math.max(...products.map(p => Number(p.id) || 0)) + 1 
+      products.length > 0
+        ? Math.max(...products.map((p) => Number(p.id) || 0)) + 1
         : 1
     );
     const newProduct: Product = {
@@ -125,26 +171,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       id: newId,
       rating: 5.0,
       reviewCount: 0,
-      available: true
+      available: true,
     };
     setProducts([...products, newProduct]);
   };
 
   const updateProduct = (id: string, updatedFields: Partial<Product>) => {
-    const newProducts = products.map((p) => {
-      if (p.id === id) {
-        return { ...p, ...updatedFields };
-      }
-      return p;
-    });
-    setProducts(newProducts);
+    setProducts(products.map((p) => (p.id === id ? { ...p, ...updatedFields } : p)));
   };
 
   const deleteProduct = (id: string) => {
-    const newProducts = products.filter((p) => p.id !== id);
-    setProducts(newProducts);
-    // Also remove from cart if it was there
+    setProducts(products.filter((p) => p.id !== id));
     removeFromCart(id);
+    removeFromFavourites(id);
   };
 
   return (
@@ -152,9 +191,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       value={{
         products: loaded ? products : initialMockProducts,
         cart,
+        favourites,
         addToCart,
         removeFromCart,
         clearCart,
+        addToFavourites,
+        removeFromFavourites,
         addProduct,
         updateProduct,
         deleteProduct,
@@ -172,3 +214,4 @@ export function useAppStore() {
   }
   return context;
 }
+

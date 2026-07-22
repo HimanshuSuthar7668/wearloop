@@ -87,7 +87,7 @@ export default function FeaturedSection() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12 featured-header">
         <div className="featured-header-text">
-          <p className="text-xs uppercase tracking-[0.25em] text-[#c9a898] mb-3">
+          <p className="text-xs uppercase tracking-[0.25em] text-rose mb-3">
             Curated for you
           </p>
           <h2 className="font-display text-4xl md:text-5xl font-bold text-parchment">

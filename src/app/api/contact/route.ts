@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     const { error } = await resend.emails.send({
       from: "WearLoop Contact <onboarding@resend.dev>",
-      to: process.env.CONTACT_EMAIL || "hello@wearloop.in",
+      to: process.env.CONTACT_EMAIL || "himanshu.suthar.dev@gmail.com",
       subject: `[${topicLabel}] New message from ${name}`,
       replyTo: email,
       html: `

@@ -476,9 +476,9 @@ export default function ProfilePageContent() {
                       {/* Interactive Custom SVG Chart */}
                       <svg viewBox="0 0 500 200" className="w-full h-auto overflow-visible">
                         {/* Grid lines */}
-                        <line x1="30" y1="150" x2="480" y2="150" stroke="#f5f0e8" strokeOpacity="0.1" strokeWidth="1" />
-                        <line x1="30" y1="100" x2="480" y2="100" stroke="#f5f0e8" strokeOpacity="0.1" strokeWidth="1" strokeDasharray="3" />
-                        <line x1="30" y1="50" x2="480" y2="50" stroke="#f5f0e8" strokeOpacity="0.1" strokeWidth="1" strokeDasharray="3" />
+                        <line x1="30" y1="150" x2="480" y2="150" stroke="#1a1a2e" strokeOpacity="0.1" strokeWidth="1" />
+                        <line x1="30" y1="100" x2="480" y2="100" stroke="#1a1a2e" strokeOpacity="0.1" strokeWidth="1" strokeDasharray="3" />
+                        <line x1="30" y1="50" x2="480" y2="50" stroke="#1a1a2e" strokeOpacity="0.1" strokeWidth="1" strokeDasharray="3" />
 
                         {/* Rendering Bars */}
                         {analyticsData.chartPoints.map((point, index) => {

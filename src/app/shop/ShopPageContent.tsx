@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import ProductCard from "@/components/ui/ProductCard";
 import { categories, occasions } from "@/lib/mockData";
 import { FilterState, Product } from "@/types";
-import { SlidersHorizontal, X, Plus } from "lucide-react";
+import { SlidersHorizontal, X, Plus, ChevronDown } from "lucide-react";
 import { useAppStore } from "@/context/AppContext";
 import { getAuthUser } from "@/lib/utils";
 import Button from "@/components/ui/Button";
@@ -20,12 +21,31 @@ const defaultFilters: FilterState = {
 
 const sizes = ["all", "XS", "S", "M", "L", "XL"];
 
+const sortOptions = [
+  { value: "popular", label: "Most Popular" },
+  { value: "price-asc", label: "Price: Low to High" },
+  { value: "price-desc", label: "Price: High to Low" },
+  { value: "newest", label: "Newest" },
+];
+
 export default function ShopPageContent() {
   const { products, addProduct } = useAppStore();
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [showFilters, setShowFilters] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const sortRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
+        setIsSortOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // New product form states
   const [name, setName] = useState("");
@@ -63,7 +83,7 @@ export default function ShopPageContent() {
     result = result.filter(
       (p) =>
         p.rentalPrice.perDay >= filters.minPrice &&
-        p.rentalPrice.perDay <= filters.maxPrice
+        p.rentalPrice.perDay <= filters.maxPrice,
     );
 
     switch (filters.sort) {
@@ -85,7 +105,7 @@ export default function ShopPageContent() {
 
   const updateFilter = <K extends keyof FilterState>(
     key: K,
-    value: FilterState[K]
+    value: FilterState[K],
   ) => setFilters((prev) => ({ ...prev, [key]: value }));
 
   const toggleSize = (sizeVal: string) => {
@@ -176,18 +196,56 @@ export default function ShopPageContent() {
               </Button>
             )}
 
-            <select
-              value={filters.sort}
-              onChange={(e) =>
-                updateFilter("sort", e.target.value as FilterState["sort"])
-              }
-              className="text-xs bg-parchment/5 border border-parchment/10 text-parchment/70 rounded px-3 py-2 focus:outline-none focus:border-rose/50"
-            >
-              <option value="popular">Most Popular</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-              <option value="newest">Newest</option>
-            </select>
+            <div className="relative" ref={sortRef}>
+              <button
+                onClick={() => {
+                  setIsSortOpen(!isSortOpen);
+                  console.log("55555");
+                }}
+                className="flex items-center justify-between min-w-[140px] text-xs bg-parchment/5 border border-parchment/10 text-parchment/70 rounded px-3 py-2 hover:border-rose/50 focus:border-rose/50 focus:outline-none transition-colors"
+              >
+                <span>
+                  {sortOptions.find((opt) => opt.value === filters.sort)
+                    ?.label || "Sort By"}
+                </span>
+                <ChevronDown
+                  size={14}
+                  className={`transition-transform duration-200 ${isSortOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              <AnimatePresence>
+                {isSortOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 5 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute inset-x-0 top-full mt-2 bg-charcoal-light border border-parchment/10 rounded-lg shadow-xl overflow-hidden z-50"
+                  >
+                    {sortOptions.map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => {
+                          updateFilter(
+                            "sort",
+                            option.value as FilterState["sort"],
+                          );
+                          setIsSortOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-2.5 text-xs transition-colors flex items-center justify-between ${
+                          filters.sort === option.value
+                            ? "bg-rose/10 text-rose"
+                            : "text-parchment/70 hover:bg-parchment/5 hover:text-parchment"
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             <button
               onClick={() => setShowFilters(!showFilters)}
@@ -309,7 +367,9 @@ export default function ShopPageContent() {
             <form onSubmit={handleAddProduct} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs text-parchment/50 block mb-1">Piece Name</label>
+                  <label className="text-xs text-parchment/50 block mb-1">
+                    Piece Name
+                  </label>
                   <input
                     type="text"
                     value={name}
@@ -320,7 +380,9 @@ export default function ShopPageContent() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-parchment/50 block mb-1">Brand</label>
+                  <label className="text-xs text-parchment/50 block mb-1">
+                    Brand
+                  </label>
                   <input
                     type="text"
                     value={brand}
@@ -334,10 +396,14 @@ export default function ShopPageContent() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs text-parchment/50 block mb-1">Category</label>
+                  <label className="text-xs text-parchment/50 block mb-1">
+                    Category
+                  </label>
                   <select
                     value={category}
-                    onChange={(e) => setCategory(e.target.value as Product["category"])}
+                    onChange={(e) =>
+                      setCategory(e.target.value as Product["category"])
+                    }
                     className="w-full bg-charcoal border border-parchment/10 rounded-lg px-4 py-2.5 text-sm text-parchment focus:border-rose outline-none"
                   >
                     <option value="dress">Dresses</option>
@@ -349,10 +415,14 @@ export default function ShopPageContent() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs text-parchment/50 block mb-1">Occasion</label>
+                  <label className="text-xs text-parchment/50 block mb-1">
+                    Occasion
+                  </label>
                   <select
                     value={occasion}
-                    onChange={(e) => setOccasion(e.target.value as Product["occasion"])}
+                    onChange={(e) =>
+                      setOccasion(e.target.value as Product["occasion"])
+                    }
                     className="w-full bg-charcoal border border-parchment/10 rounded-lg px-4 py-2.5 text-sm text-parchment focus:border-rose outline-none"
                   >
                     <option value="casual">Casual</option>
@@ -365,7 +435,9 @@ export default function ShopPageContent() {
               </div>
 
               <div>
-                <label className="text-xs text-parchment/50 block mb-1">Description</label>
+                <label className="text-xs text-parchment/50 block mb-1">
+                  Description
+                </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -378,7 +450,9 @@ export default function ShopPageContent() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs text-parchment/50 block mb-1">Image Path / URL</label>
+                  <label className="text-xs text-parchment/50 block mb-1">
+                    Image Path / URL
+                  </label>
                   <input
                     type="text"
                     value={imagePath}
@@ -389,7 +463,9 @@ export default function ShopPageContent() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-parchment/50 block mb-1">Retail Price (₹)</label>
+                  <label className="text-xs text-parchment/50 block mb-1">
+                    Retail Price (₹)
+                  </label>
                   <input
                     type="number"
                     value={retailPrice || ""}
@@ -403,7 +479,9 @@ export default function ShopPageContent() {
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="text-[10px] uppercase text-parchment/50 block mb-1">1-Day Rental (₹)</label>
+                  <label className="text-[10px] uppercase text-parchment/50 block mb-1">
+                    1-Day Rental (₹)
+                  </label>
                   <input
                     type="number"
                     value={price1Day || ""}
@@ -414,7 +492,9 @@ export default function ShopPageContent() {
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase text-parchment/50 block mb-1">3-Day Rental (₹)</label>
+                  <label className="text-[10px] uppercase text-parchment/50 block mb-1">
+                    3-Day Rental (₹)
+                  </label>
                   <input
                     type="number"
                     value={price3Day || ""}
@@ -425,7 +505,9 @@ export default function ShopPageContent() {
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase text-parchment/50 block mb-1">7-Day Rental (₹)</label>
+                  <label className="text-[10px] uppercase text-parchment/50 block mb-1">
+                    7-Day Rental (₹)
+                  </label>
                   <input
                     type="number"
                     value={price7Day || ""}
@@ -438,7 +520,9 @@ export default function ShopPageContent() {
               </div>
 
               <div>
-                <label className="text-xs text-parchment/50 block mb-2 font-medium">Select Sizes</label>
+                <label className="text-xs text-parchment/50 block mb-2 font-medium">
+                  Select Sizes
+                </label>
                 <div className="flex gap-2">
                   {["XS", "S", "M", "L", "XL"].map((sz) => (
                     <button
@@ -458,7 +542,9 @@ export default function ShopPageContent() {
               </div>
 
               <div>
-                <label className="text-xs text-parchment/50 block mb-1">Tags (comma separated)</label>
+                <label className="text-xs text-parchment/50 block mb-1">
+                  Tags (comma separated)
+                </label>
                 <input
                   type="text"
                   value={tagsInput}

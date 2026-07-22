@@ -6,6 +6,7 @@ const config: Config = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  darkMode: "class",
   theme: {
     screens: {
       xxxs: "391px",
@@ -36,15 +37,15 @@ const config: Config = {
         max: "6000",
       },
       colors: {
-        charcoal: "#1A1A2E",
-        "charcoal-light": "#252540",
-        parchment: "#F5F0E8",
-        "parchment-dark": "#E8E0D0",
-        rose: "#C9A898",
-        "rose-dark": "#B8907E",
-        sage: "#8A9E8C",
-        "sage-dark": "#6B7D6D",
-        mist: "#D4CFC8",
+        charcoal: "rgb(var(--charcoal) / <alpha-value>)",
+        "charcoal-light": "rgb(var(--charcoal-light) / <alpha-value>)",
+        parchment: "rgb(var(--parchment) / <alpha-value>)",
+        "parchment-dark": "rgb(var(--parchment-dark) / <alpha-value>)",
+        rose: "rgb(var(--rose) / <alpha-value>)",
+        "rose-dark": "rgb(var(--rose-dark) / <alpha-value>)",
+        sage: "rgb(var(--sage) / <alpha-value>)",
+        "sage-dark": "rgb(var(--sage-dark) / <alpha-value>)",
+        mist: "rgb(var(--mist) / <alpha-value>)",
       },
       borderRadius: {
         "2lg": "10px",
