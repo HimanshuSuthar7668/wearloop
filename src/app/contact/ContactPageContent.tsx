@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { motion } from "framer-motion";
 import {
   Mail,
   Phone,
@@ -46,23 +47,15 @@ const contactInfo = [
   },
 ];
 
-const topics = [
-  { value: "order", label: "Hiring For Job" },
-  { value: "sizing", label: "Searching Frontend Dev." },
-  { value: "partnership", label: "Need Fullstack Dev." },
-];
-
 interface FormState {
   name: string;
   email: string;
-  subject: string;
   message: string;
 }
 
 const emptyForm: FormState = {
   name: "",
   email: "",
-  subject: "order",
   message: "",
 };
 
@@ -157,7 +150,6 @@ export default function ContactPageContent() {
         body: JSON.stringify({
           name: form.name,
           email: form.email,
-          subject: form.subject,
           message: form.message,
         }),
       });
@@ -311,22 +303,7 @@ export default function ContactPageContent() {
                     </div>
                   </div>
 
-                  <div>
-                    <label className="text-xs text-parchment/50 uppercase tracking-wider block mb-1.5">
-                      What&apos;s this about?
-                    </label>
-                    <select
-                      value={form.subject}
-                      onChange={(e) => updateField("subject", e.target.value)}
-                      className="w-full bg-charcoal border border-parchment/10 focus:border-rose/60 text-parchment rounded-lg px-4 py-3 text-sm outline-none transition-colors"
-                    >
-                      {topics.map((t) => (
-                        <option key={t.value} value={t.value}>
-                          {t.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+
 
                   <div>
                     <label className="text-xs text-parchment/50 uppercase tracking-wider block mb-1.5">

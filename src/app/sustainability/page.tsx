@@ -11,9 +11,31 @@ import {
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Sustainability — WearLoop",
+  title: "Our Sustainability Commitment",
   description:
-    "How WearLoop reduces textile waste through circular fashion — our impact, our process, and the practices behind every rental.",
+    "How WearLoop reduces textile waste through circular fashion — 156 tonnes prevented, 30x average garment uses, 70% less water. Our impact, our process.",
+  keywords: [
+    "sustainable fashion India",
+    "circular fashion",
+    "reduce textile waste",
+    "eco-friendly clothing rental",
+    "WearLoop sustainability",
+  ],
+  alternates: {
+    canonical: "https://www.wearloop.in/sustainability",
+  },
+  openGraph: {
+    title: "Our Sustainability Commitment — WearLoop",
+    description:
+      "156 tonnes of textile waste prevented. 30x average garment uses. See how renting instead of buying changes the math for the planet.",
+    url: "https://www.wearloop.in/sustainability",
+    type: "website",
+  },
+  twitter: {
+    title: "Our Sustainability Commitment — WearLoop",
+    description:
+      "156 tonnes of textile waste prevented. 30x average garment uses. See how renting instead of buying changes the math for the planet.",
+  },
 };
 
 const pillars = [

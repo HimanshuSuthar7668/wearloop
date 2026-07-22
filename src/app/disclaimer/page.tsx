@@ -3,10 +3,14 @@ import { AlertTriangle, Code2, ShieldOff, Mail } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Disclaimer — WearLoop",
+  title: "Disclaimer",
   description:
-    "WearLoop is a demo project built for practice and learning purposes only — not a real, operating business.",
-  robots: { index: false, follow: false },
+    "WearLoop is a demo / educational project built for practice. Not a real operating business — no real products, sales, or transactions take place.",
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: { index: false, follow: false },
+  },
 };
 
 const points = [

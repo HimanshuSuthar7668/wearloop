@@ -3,9 +3,29 @@ import { ArrowRight, Mail } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — WearLoop",
+  title: "Privacy Policy",
   description:
-    "How WearLoop collects, uses, and protects your personal data.",
+    "How WearLoop collects, uses, and protects your personal data. Our privacy practices in line with India's DPDP Act 2023.",
+  keywords: [
+    "WearLoop privacy policy",
+    "fashion rental data privacy",
+    "personal data protection India",
+  ],
+  alternates: {
+    canonical: "https://www.wearloop.in/privacy",
+  },
+  openGraph: {
+    title: "Privacy Policy — WearLoop",
+    description:
+      "How WearLoop collects, uses, and protects your personal data.",
+    url: "https://www.wearloop.in/privacy",
+    type: "website",
+  },
+  twitter: {
+    title: "Privacy Policy — WearLoop",
+    description:
+      "How WearLoop collects, uses, and protects your personal data.",
+  },
 };
 
 const sections = [

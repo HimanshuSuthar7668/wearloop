@@ -3,9 +3,31 @@ import { Ruler, Shield, MessageCircleQuestion, ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Sizing Guide — WearLoop",
+  title: "Sizing Guide — Find Your Perfect Fit",
   description:
-    "Find your perfect fit with WearLoop's sizing guide — size chart, measuring tips, and our Fit Guarantee.",
+    "Find your perfect fit with WearLoop's sizing guide. International size chart, measuring tips, between-size advice, and our Fit Guarantee on every order.",
+  keywords: [
+    "WearLoop size guide",
+    "fashion rental sizing",
+    "clothes size chart India",
+    "designer size guide",
+    "fit guarantee fashion rental",
+  ],
+  alternates: {
+    canonical: "https://www.wearloop.in/sizing",
+  },
+  openGraph: {
+    title: "Sizing Guide — Find Your Perfect Fit | WearLoop",
+    description:
+      "International size chart, measuring tips, and our Fit Guarantee. Get the right fit every time — or we'll replace it free.",
+    url: "https://www.wearloop.in/sizing",
+    type: "website",
+  },
+  twitter: {
+    title: "Sizing Guide — Find Your Perfect Fit | WearLoop",
+    description:
+      "International size chart, measuring tips, and our Fit Guarantee. Get the right fit every time — or we'll replace it free.",
+  },
 };
 
 const sizeChart = [

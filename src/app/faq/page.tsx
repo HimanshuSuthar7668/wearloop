@@ -3,9 +3,31 @@ import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "FAQs — WearLoop",
+  title: "Frequently Asked Questions",
   description:
-    "Answers to common questions about renting, sizing, delivery, returns, payments, and your WearLoop account.",
+    "Answers to common questions about renting, sizing, delivery, returns, payments, and your WearLoop account. Everything you need to rent with confidence.",
+  keywords: [
+    "WearLoop FAQ",
+    "fashion rental questions",
+    "how to return rented clothes",
+    "clothes rental help",
+    "WearLoop help center",
+  ],
+  alternates: {
+    canonical: "https://www.wearloop.in/faq",
+  },
+  openGraph: {
+    title: "Frequently Asked Questions — WearLoop",
+    description:
+      "Everything you need to know about renting, returning, sizing, and getting the most out of WearLoop.",
+    url: "https://www.wearloop.in/faq",
+    type: "website",
+  },
+  twitter: {
+    title: "Frequently Asked Questions — WearLoop",
+    description:
+      "Everything you need to know about renting, returning, sizing, and getting the most out of WearLoop.",
+  },
 };
 
 const categories = [

@@ -9,9 +9,30 @@ import {
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Care Instructions — WearLoop",
+  title: "Care Instructions for Your Rental",
   description:
-    "How to care for your WearLoop rentals — what we handle, what to avoid, and how returns and damage reporting work.",
+    "How to care for your WearLoop rentals — what we handle for you, what to avoid, how to return items, and how damage reporting works.",
+  keywords: [
+    "how to care for rented clothes",
+    "WearLoop care instructions",
+    "rental clothing care",
+    "fashion rental returns",
+  ],
+  alternates: {
+    canonical: "https://www.wearloop.in/care",
+  },
+  openGraph: {
+    title: "Care Instructions for Your WearLoop Rental",
+    description:
+      "Everything we handle so you don't have to — plus a few simple habits that keep each piece in great shape for the next person.",
+    url: "https://www.wearloop.in/care",
+    type: "website",
+  },
+  twitter: {
+    title: "Care Instructions for Your WearLoop Rental",
+    description:
+      "Everything we handle so you don't have to — plus a few simple habits that keep each piece in great shape for the next person.",
+  },
 };
 
 const handledByUs = [

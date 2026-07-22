@@ -3,8 +3,30 @@ import { Search, Calendar, Package, RotateCcw, Shield, Sparkles, ArrowRight } fr
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "How It Works — WearLoop",
-  description: "Learn how WearLoop's clothing rental service works in three simple steps.",
+  title: "How It Works — Fashion Rental Made Simple",
+  description:
+    "Learn how WearLoop's clothing rental service works in four simple steps — browse, pick your dates, receive pristine pieces, and return with ease.",
+  keywords: [
+    "how fashion rental works",
+    "how to rent clothes India",
+    "WearLoop rental process",
+    "clothes on rent steps",
+  ],
+  alternates: {
+    canonical: "https://www.wearloop.in/how-it-works",
+  },
+  openGraph: {
+    title: "How WearLoop Works — Fashion Rental Made Simple",
+    description:
+      "Four easy steps to a full designer wardrobe — browse, pick dates, receive, return. No subscriptions. Free delivery.",
+    url: "https://www.wearloop.in/how-it-works",
+    type: "website",
+  },
+  twitter: {
+    title: "How WearLoop Works — Fashion Rental Made Simple",
+    description:
+      "Four easy steps to a full designer wardrobe — browse, pick dates, receive, return. No subscriptions. Free delivery.",
+  },
 };
 
 const steps = [

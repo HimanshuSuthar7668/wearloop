@@ -3,9 +3,29 @@ import { ArrowRight, Mail } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — WearLoop",
+  title: "Terms of Service",
   description:
-    "The terms governing your use of WearLoop's clothing rental service.",
+    "The terms governing your use of WearLoop's clothing rental service — rentals, payments, damage, cancellations, and your account responsibilities.",
+  keywords: [
+    "WearLoop terms of service",
+    "fashion rental terms",
+    "clothing rental agreement India",
+  ],
+  alternates: {
+    canonical: "https://www.wearloop.in/terms",
+  },
+  openGraph: {
+    title: "Terms of Service — WearLoop",
+    description:
+      "The terms governing your use of WearLoop's clothing rental service.",
+    url: "https://www.wearloop.in/terms",
+    type: "website",
+  },
+  twitter: {
+    title: "Terms of Service — WearLoop",
+    description:
+      "The terms governing your use of WearLoop's clothing rental service.",
+  },
 };
 
 const sections = [

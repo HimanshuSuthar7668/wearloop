@@ -14,9 +14,31 @@ import {
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Careers — WearLoop",
+  title: "Careers at WearLoop",
   description:
-    "Join the team building India's premium clothing rental platform. See open roles at WearLoop.",
+    "Join the team building India's premium clothing rental platform. Open roles in engineering, operations, merchandising, and customer experience.",
+  keywords: [
+    "WearLoop careers",
+    "fashion tech jobs India",
+    "sustainable fashion startup jobs",
+    "jobs at WearLoop",
+    "Bengaluru startup hiring",
+  ],
+  alternates: {
+    canonical: "https://www.wearloop.in/careers",
+  },
+  openGraph: {
+    title: "Careers at WearLoop — Build the Future of Fashion",
+    description:
+      "Help us build the wardrobe of the future. Open roles in engineering, ops, merchandising, and support.",
+    url: "https://www.wearloop.in/careers",
+    type: "website",
+  },
+  twitter: {
+    title: "Careers at WearLoop — Build the Future of Fashion",
+    description:
+      "Help us build the wardrobe of the future. Open roles in engineering, ops, merchandising, and support.",
+  },
 };
 
 const values = [
