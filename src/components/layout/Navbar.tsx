@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ShoppingBag, Menu, X, User, Search, Sun, Moon, Heart } from "lucide-react";
 import Image from "next/image";
-import logo from "@/../public/images/wearloop-logo.svg";
 import { getAuthUser, removeAuthToken, removeAuthUser } from "@/lib/utils";
 import { useAppStore } from "@/context/AppContext";
 
@@ -58,7 +57,7 @@ export default function Navbar() {
       <nav className="max-w-7xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <Image src={logo} alt="WearLoop Logo" width={40} height={40} />
+          <Image src="/images/wearloop-logo.svg" alt="WearLoop Logo" width={40} height={40} />
           <span className="font-display text-xl font-semibold tracking-wide text-parchment">WearLoop</span>
         </Link>
 
