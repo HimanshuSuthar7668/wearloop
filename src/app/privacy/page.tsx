@@ -1,32 +1,13 @@
-import Link from "next/link";
-import { ArrowRight, Mail } from "lucide-react";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
+import { PageHeader, LegalBody, PageFooterNote, ButtonLink } from "@/components/ui/Page";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Privacy Policy",
   description:
-    "How WearLoop collects, uses, and protects your personal data. Our privacy practices in line with India's DPDP Act 2023.",
-  keywords: [
-    "WearLoop privacy policy",
-    "fashion rental data privacy",
-    "personal data protection India",
-  ],
-  alternates: {
-    canonical: "https://www.wearloop.in/privacy",
-  },
-  openGraph: {
-    title: "Privacy Policy — WearLoop",
-    description:
-      "How WearLoop collects, uses, and protects your personal data.",
-    url: "https://www.wearloop.in/privacy",
-    type: "website",
-  },
-  twitter: {
-    title: "Privacy Policy — WearLoop",
-    description:
-      "How WearLoop collects, uses, and protects your personal data.",
-  },
-};
+    "What personal data WearLoop collects, why, who we share it with and how to ask us to delete it.",
+  path: "/privacy",
+});
 
 const sections = [
   {
@@ -97,85 +78,17 @@ const sections = [
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen pt-20">
-      {/* Hero */}
-      <section className="max-w-4xl mx-auto px-6 md:px-10 py-16 text-center">
-        <p className="text-xs uppercase tracking-[0.25em] text-[#c9a898] mb-4">
-          Legal
-        </p>
-        <h1 className="font-display text-5xl md:text-6xl font-bold text-parchment mb-5 text-balance">
-          Privacy Policy
-        </h1>
-        <p className="text-parchment/40 text-sm">Last updated: 4 July 2026</p>
-      </section>
-
-      {/* Intro */}
-      <section className="max-w-3xl mx-auto px-6 md:px-10 pb-4">
-        <p className="text-parchment/50 leading-relaxed">
-          This Privacy Policy explains how WearLoop (&quot;WearLoop&quot;, &quot;we&quot;, &quot;us&quot;,
-          or &quot;our&quot;) collects, uses, shares, and protects your personal data
-          when you use our website, mobile app, and rental services. By using
-          WearLoop, you agree to the practices described in this policy.
-        </p>
-      </section>
-
-      {/* Sections */}
-      <section className="max-w-3xl mx-auto px-6 md:px-10 py-16">
-        <div className="flex flex-col divide-y divide-parchment/10">
-          {sections.map(({ title, body }) => (
-            <div key={title} className="py-8">
-              <h2 className="font-display text-xl font-semibold text-parchment mb-4">
-                {title}
-              </h2>
-              <div className="flex flex-col gap-3">
-                {body.map((paragraph, i) => (
-                  <p
-                    key={i}
-                    className="text-sm text-parchment/50 leading-relaxed"
-                  >
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Contact */}
-      <section className="bg-charcoal-light border-y border-parchment/10 py-16">
-        <div className="max-w-3xl mx-auto px-6 md:px-10 text-center">
-          <h2 className="font-display text-xl font-semibold text-parchment mb-3">
-            Questions about your data?
-          </h2>
-          <p className="text-sm text-parchment/50 leading-relaxed mb-5">
-            For any privacy-related queries, requests to access or delete
-            your data, or concerns about how your information is handled,
-            reach out to our privacy team directly.
-          </p>
-          <a
-            href="mailto:privacy@wearloop.in"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-parchment hover:text-[#c9a898] transition-colors"
-          >
-            <Mail size={14} />
-            privacy@wearloop.in
-          </a>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="max-w-7xl mx-auto px-6 md:px-10 py-24 text-center">
-        <p className="font-display text-2xl font-semibold text-parchment mb-4">
-          Have more questions?
-        </p>
-        <Link
-          href="/contact"
-          className="inline-flex items-center gap-2 bg-rose text-charcoal font-semibold text-sm px-8 py-4 rounded-lg hover:bg-rose-dark transition-colors group"
-        >
-          Contact us
-          <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-        </Link>
-      </section>
+    <div className="pt-20">
+      <PageHeader title="Privacy Policy" meta="Last updated 4 July 2026" />
+      <LegalBody
+        intro={<>This Privacy Policy explains how WearLoop (&quot;WearLoop&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, shares, and protects your personal data when you use our website, mobile app, and rental services. By using WearLoop, you agree to the practices described in this policy.</>}
+        sections={sections}
+      />
+      <PageFooterNote
+        title="Questions about your data?"
+        body="To see, correct or delete what we hold about you, or for any other privacy question, write to us."
+        action={<ButtonLink href="mailto:privacy@wearloop.in">privacy@wearloop.in</ButtonLink>}
+      />
     </div>
   );
 }

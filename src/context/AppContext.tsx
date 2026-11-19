@@ -10,13 +10,38 @@ export interface CartItem {
   productId: string;
   size: string;
   days: number;
+  /** First day of the rental, YYYY-MM-DD. */
+  startDate?: string;
+}
+
+// The cart API only stores product ids, so the rental details chosen on the
+// product page are remembered in the browser and merged back in on load.
+const CART_DETAILS_KEY = "wearloop_cart_details";
+
+function readCartDetails(): Record<string, Omit<CartItem, "productId">> {
+  try {
+    return JSON.parse(localStorage.getItem(CART_DETAILS_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function writeCartDetails(items: CartItem[]) {
+  try {
+    const map = Object.fromEntries(items.map(({ productId, ...rest }) => [productId, rest]));
+    localStorage.setItem(CART_DETAILS_KEY, JSON.stringify(map));
+  } catch {
+    // Storage can be unavailable (private mode); the bag still works for this visit.
+  }
 }
 
 interface AppContextType {
+  /** False until the first products response (or fallback) has arrived. */
+  loaded: boolean;
   products: Product[];
   cart: CartItem[];
   favourites: string[]; // array of productIds
-  addToCart: (productId: string, size: string, days: number) => Promise<boolean>;
+  addToCart: (productId: string, size: string, days: number, startDate?: string) => Promise<boolean>;
   removeFromCart: (productId: string) => Promise<void>;
   clearCart: () => Promise<void>;
   addToFavourites: (productId: string) => Promise<boolean>;
@@ -58,11 +83,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         try {
           const backendCart = await cartApi.getAll(token);
           if (backendCart && Array.isArray(backendCart)) {
-            activeCart = backendCart.map((item) => ({
-              productId: String(item.product_id),
-              size: "M",
-              days: 3,
-            }));
+            const details = readCartDetails();
+            activeCart = backendCart.map((item) => {
+              const id = String(item.product_id);
+              return { productId: id, size: details[id]?.size ?? "", days: details[id]?.days ?? 3, startDate: details[id]?.startDate };
+            });
           }
         } catch (err) {
           console.error("Failed to load cart from backend API:", err);
@@ -86,15 +111,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     initApp();
   }, []);
 
-  const addToCart = async (productId: string, size: string, days: number): Promise<boolean> => {
+  const addToCart = async (productId: string, size: string, days: number, startDate?: string): Promise<boolean> => {
     const token = getAuthToken();
     if (!token) return false;
 
     const alreadyExists = cart.some((item) => item.productId === productId);
     if (alreadyExists) return false;
 
-    const newCart = [...cart, { productId, size, days }];
+    const newCart = [...cart, { productId, size, days, startDate }];
     setCart(newCart);
+    writeCartDetails(newCart);
 
     try {
       await cartApi.addToCart(Number(productId), token);
@@ -108,6 +134,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const token = getAuthToken();
     const newCart = cart.filter((item) => item.productId !== productId);
     setCart(newCart);
+    writeCartDetails(newCart);
 
     if (token) {
       try {
@@ -120,6 +147,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = async () => {
     setCart([]);
+    writeCartDetails([]);
     const token = getAuthToken();
     if (token) {
       try {
@@ -192,6 +220,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         products: loaded ? products : initialMockProducts,
         cart,
         favourites,
+        loaded,
         addToCart,
         removeFromCart,
         clearCart,

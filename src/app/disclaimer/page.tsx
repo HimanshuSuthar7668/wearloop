@@ -1,117 +1,71 @@
-import Link from "next/link";
-import { AlertTriangle, Code2, ShieldOff, Mail } from "lucide-react";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
+import { PageHeader, Section, RuledList, PageFooterNote, TextLink } from "@/components/ui/Page";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Disclaimer",
   description:
-    "WearLoop is a demo / educational project built for practice. Not a real operating business — no real products, sales, or transactions take place.",
-  robots: {
-    index: false,
-    follow: false,
-    googleBot: { index: false, follow: false },
-  },
-};
+    "WearLoop is a practice project. Nothing on this site is for sale, and no real orders or payments are taken.",
+  path: "/disclaimer",
+  noindex: true,
+});
 
 const points = [
   {
-    icon: Code2,
     title: "This is a practice project",
-    body: "WearLoop is a personal / educational project built to practice web development — design, front-end engineering, and backend integration. It is not a registered company, and no real clothing rental business operates behind it.",
+    body: "WearLoop is a personal, educational project built to practise design, front-end engineering and backend integration. It isn't a registered company, and there is no real clothing rental business behind it.",
   },
   {
-    icon: ShieldOff,
     title: "Nothing here is for sale",
-    body: "Every product, price, brand name, and rental listing on this site is placeholder content created for demonstration purposes. WearLoop does not sell, rent, ship, or fulfil anything in the real world, and no genuine transaction takes place through this site.",
+    body: "Every product, price, brand name and listing is placeholder content. WearLoop doesn't sell, rent, ship or deliver anything, and no real transaction happens on this site.",
   },
   {
-    icon: AlertTriangle,
     title: "Don't enter real payment details",
-    body: "The checkout flow simulates a payment for demo purposes only — it does not connect to a real payment gateway. Please don't enter real card numbers, UPI credentials, or other sensitive payment information anywhere on this site.",
+    body: "Checkout only simulates a payment and isn't connected to a real payment gateway. Please don't type real card numbers, UPI details or other sensitive payment information anywhere here.",
   },
 ];
 
 export default function DisclaimerPage() {
   return (
-    <div className="min-h-screen pt-20">
-      {/* Hero */}
-      <section className="max-w-4xl mx-auto px-6 md:px-10 py-16 text-center">
-        <p className="text-xs uppercase tracking-[0.25em] text-[#c9a898] mb-4">
-          Please read
-        </p>
-        <h1 className="font-display text-5xl md:text-6xl font-bold text-parchment mb-5 text-balance">
-          Disclaimer
-        </h1>
-        <p className="text-parchment/40 text-sm">Last updated: 4 July 2026</p>
-      </section>
+    <div className="pt-20">
+      <PageHeader title="Disclaimer" meta="Last updated 4 July 2026" />
 
-      {/* Callout */}
-      <section className="max-w-3xl mx-auto px-6 md:px-10 pb-4">
-        <div className="flex gap-4 items-start bg-rose/5 border border-rose/20 rounded-2xl p-6">
-          <AlertTriangle size={20} className="text-[#c9a898] shrink-0 mt-0.5" />
-          <p className="text-parchment/70 leading-relaxed text-sm">
-            <strong className="text-parchment">WearLoop is not a real business.</strong>{" "}
-            This entire website — including its products, brands, pricing, and rental
-            listings — was built purely for practice and demonstration purposes. Nothing
-            on this site is being sold, rented, promoted, or offered in the real world.
+      <section className="max-w-7xl mx-auto px-6 md:px-10">
+        <div className="border-l-4 border-rose-ink bg-paper-2 px-6 py-6 md:px-8 max-w-3xl">
+          <p className="font-display text-xl md:text-2xl text-ink">WearLoop is not a real business.</p>
+          <p className="mt-2 text-ink/80 leading-relaxed">
+            The whole site, including its products, brands, prices and
+            listings, was built for practice and demonstration. Nothing on it
+            is being sold, rented, promoted or offered in the real world.
           </p>
         </div>
       </section>
 
-      {/* Points */}
-      <section className="max-w-3xl mx-auto px-6 md:px-10 py-16">
-        <div className="flex flex-col divide-y divide-parchment/10">
-          {points.map(({ icon: Icon, title, body }) => (
-            <div key={title} className="py-8 flex gap-5">
-              <div className="shrink-0 w-11 h-11 rounded-xl bg-rose/10 border border-rose/20 flex items-center justify-center">
-                <Icon size={18} className="text-[#c9a898]" />
-              </div>
-              <div>
-                <h2 className="font-display text-lg font-semibold text-parchment mb-2">
-                  {title}
-                </h2>
-                <p className="text-sm text-parchment/50 leading-relaxed">{body}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      <Section title="In short">
+        <RuledList items={points} />
+      </Section>
 
-      {/* Extra notes */}
-      <section className="max-w-3xl mx-auto px-6 md:px-10 pb-16">
-        <div className="flex flex-col gap-3 text-sm text-parchment/50 leading-relaxed">
+      <Section title="Also worth knowing" tinted>
+        <div className="max-w-2xl space-y-4 text-ink/80 leading-relaxed">
           <p>
-            Any resemblance to real brands, products, or businesses is unintentional and
-            used only as realistic-looking placeholder content. All names, images, and
-            descriptions are for illustration purposes and carry no commercial intent.
+            Any resemblance to real brands, products or businesses is
+            unintentional. Names, images and descriptions are there to make
+            the demo look realistic and carry no commercial intent.
           </p>
           <p>
-            The site&apos;s Privacy Policy and Terms of Service pages are also written as
-            realistic examples of what such documents would look like for a real
-            business — they don&apos;t reflect an actual company&apos;s legal
-            obligations toward you.
+            The Privacy Policy and Terms of Service are written as examples of
+            what those documents would look like for a real business. They
+            don&apos;t describe any actual company&apos;s legal obligations to
+            you.
           </p>
         </div>
-      </section>
+      </Section>
 
-      {/* Contact */}
-      <section className="bg-charcoal-light border-y border-parchment/10 py-16">
-        <div className="max-w-3xl mx-auto px-6 md:px-10 text-center">
-          <h2 className="font-display text-xl font-semibold text-parchment mb-3">
-            Have a question about this project?
-          </h2>
-          <p className="text-sm text-parchment/50 leading-relaxed mb-5">
-            Feel free to reach out — happy to talk about how it was built.
-          </p>
-          <Link
-            href="/contact"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-parchment hover:text-[#c9a898] transition-colors"
-          >
-            <Mail size={14} />
-            Get in touch
-          </Link>
-        </div>
-      </section>
+      <PageFooterNote
+        title="Curious how it was built?"
+        body="Happy to talk about it."
+        action={<TextLink href="/contact">Get in touch</TextLink>}
+      />
     </div>
   );
 }

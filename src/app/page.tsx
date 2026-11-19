@@ -6,33 +6,9 @@ import SustainabilitySection from "@/components/sections/SustainabilitySection";
 import CTASection from "@/components/sections/CTASection";
 
 export const metadata: Metadata = {
-  title: "WearLoop — Rent. Wear. Return. Repeat.",
-  description:
-    "Discover premium fashion rentals from 180+ brands. Wear designer clothes for any occasion without the commitment. Sustainable, affordable, endlessly stylish.",
-  keywords: [
-    "clothes rental India",
-    "rent designer clothes",
-    "fashion rental platform",
-    "sustainable fashion India",
-    "outfit rental",
-    "dress rental",
-    "WearLoop",
-  ],
-  alternates: {
-    canonical: "https://www.wearloop.in",
-  },
-  openGraph: {
-    title: "WearLoop — Rent. Wear. Return. Repeat.",
-    description:
-      "Wear 2,400+ premium pieces from 180+ brands. Sustainable, pay-as-you-go fashion rental delivered to your door.",
-    url: "https://www.wearloop.in",
-    type: "website",
-  },
-  twitter: {
-    title: "WearLoop — Rent. Wear. Return. Repeat.",
-    description:
-      "Wear 2,400+ premium pieces from 180+ brands. Sustainable, pay-as-you-go fashion rental delivered to your door.",
-  },
+  // The homepage uses the full default title rather than the "%s | WearLoop" template.
+  title: { absolute: "WearLoop | Rent outfits for weddings, parties and black tie" },
+  alternates: { canonical: "/" },
 };
 
 export default function HomePage() {

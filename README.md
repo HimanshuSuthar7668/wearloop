@@ -1,109 +1,60 @@
-# WearLoop — Frontend
+# WearLoop (frontend)
 
-A Next.js 14 frontend for WearLoop, a circular fashion rental platform.
+Next.js 14 app for WearLoop, a clothing rental site. Uses the App Router,
+TypeScript and Tailwind. Scroll reveals use GSAP and icons come from lucide-react.
 
-## Stack
-
-- **Next.js 14** (App Router, TypeScript, `src/` directory)
-- **Tailwind CSS** — custom design tokens for WearLoop's editorial palette
-- **ESLint** — `next/core-web-vitals` config
-- **Lucide React** — icons
-
-## Project Structure
-
-```
-src/
-├── app/
-│   ├── layout.tsx          # Root layout (Navbar + Footer)
-│   ├── page.tsx            # Homepage
-│   ├── globals.css         # Tailwind + base styles + fonts
-│   ├── auth/page.tsx       # Sign in / Register
-│   ├── shop/
-│   │   ├── page.tsx        # Browseable product grid with filters
-│   │   └── [id]/page.tsx   # Product detail + rental booking
-│   ├── cart/page.tsx       # Rental bag
-│   ├── how-it-works/       # How It Works page
-│   └── about/              # About page
-├── components/
-│   ├── layout/
-│   │   ├── Navbar.tsx
-│   │   └── Footer.tsx
-│   ├── sections/
-│   │   ├── HeroSection.tsx         # Circular rotating text signature
-│   │   ├── FeaturedSection.tsx
-│   │   ├── HowItWorksSection.tsx
-│   │   ├── SustainabilitySection.tsx
-│   │   └── CTASection.tsx
-│   └── ui/
-│       ├── Button.tsx
-│       └── ProductCard.tsx
-├── lib/
-│   ├── api.ts          # Axios-less fetch client → your Express backend
-│   ├── mockData.ts     # Product fixtures for development
-│   └── utils.ts        # formatPrice, getRentalPrice, token helpers
-└── types/index.ts      # Shared TS types matching your backend DTOs
-```
-
-## Getting Started
-
-### 1. Install dependencies
+## Running it
 
 ```bash
 npm install
+echo "NEXT_PUBLIC_API_URL=http://localhost:5000" > .env.local
+echo "RESEND_API_KEY=re_..." >> .env.local   # the contact form and `npm run build` need it
+npm run dev                  # http://localhost:3002
 ```
 
-### 2. Configure environment
+`NEXT_PUBLIC_API_URL` points at the Express API (default `http://localhost:5000`).
+Endpoints are listed in [ROUTES.md](ROUTES.md).
 
-```bash
-cp .env.example .env.local
-```
+## Where things are
 
-Edit `.env.local`:
+- `src/app/` holds the routes. Pages that need client state keep their UI in a
+  `*Content.tsx` file next to `page.tsx`, so `page.tsx` can export metadata.
+- `src/components/sections/` holds the homepage sections.
+- `src/components/layout/` holds the Navbar and Footer.
+- `src/hooks/useReveal.ts` is the one scroll-in animation. Add `data-reveal` to
+  children of the element that gets the ref. Users who set reduced motion
+  don't get it.
+- `src/lib/api.ts` is the fetch client. `src/lib/mockData.ts` has the product
+  fixtures used until the API serves products.
+- `src/context/AppContext.tsx` holds the cart and favourites.
 
-```env
-NEXT_PUBLIC_API_URL=http://localhost:5000
-```
+## Theme
 
-This should match the `PORT` in your backend's `.env`.
+Colours are CSS variables in `src/app/globals.css`, switched by the `dark` class
+on `<html>`.
 
-### 3. Start the dev server
+| Token | Use |
+| --- | --- |
+| `paper`, `paper-2` | Page background, tinted bands |
+| `ink`, `ink-2` | Text, primary buttons |
+| `rose`, `sage` | Accent fills and borders |
+| `rose-ink`, `sage-ink` | Accent text. Darker in light mode and lighter in dark mode, so it stays readable |
 
-```bash
-npm run dev
-```
+Headings use Fraunces (loaded with `next/font`) and body text uses Inter.
 
-Opens at `http://localhost:3000`.
+## Building pages
 
-## Connecting to the Backend
+Content pages are put together from `src/components/ui/Page.tsx`: `PageHeader`,
+`Section`, `RuledList`, `PageFooterNote`, `LegalBody`, `ButtonLink` and
+`TextLink`. Use those before adding new one-off layouts.
 
-All API calls go through `src/lib/api.ts`. The client reads `NEXT_PUBLIC_API_URL` and calls your existing endpoints:
+## Social links
 
-| Frontend action       | Backend endpoint             |
-| --------------------- | ---------------------------- |
-| Sign in               | `POST /auth/login`           |
-| Register              | `POST /auth/register`        |
-| Browse products       | `GET /products`              |
-| Product detail        | `GET /products/:id`          |
-| Place order           | `POST /orders`               |
-| My orders             | `GET /orders/my`             |
-| Cancel order          | `PATCH /orders/:id/cancel`   |
-| Payments              | `POST /payments`             |
-
-JWT tokens are stored in `localStorage` under `wearloop_token` and sent as `Authorization: Bearer <token>` on protected routes.
-
-## Design Tokens
-
-| Token             | Hex       | Usage                        |
-| ----------------- | --------- | ---------------------------- |
-| `charcoal`        | `#1A1A2E` | Page background              |
-| `charcoal-light`  | `#252540` | Card / section backgrounds   |
-| `parchment`       | `#F5F0E8` | Primary text                 |
-| `rose`            | `#C9A898` | Primary accent / CTA         |
-| `sage`            | `#8A9E8C` | Sustainability / secondary   |
+Footer icons only appear for entries in `socialLinks`
+(`src/components/layout/Footer.tsx`) that have a URL.
 
 ## Build
 
 ```bash
-npm run build
-npm start
+npm run build && npm start
 ```

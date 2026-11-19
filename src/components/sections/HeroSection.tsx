@@ -1,127 +1,87 @@
-"use client";
-
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import ThreeLoop from "@/components/ui/ThreeLoop";
+import { buttonClass } from "@/components/ui/Button";
+import { mockProducts } from "@/lib/mockData";
+import { formatPrice } from "@/lib/utils";
 
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
+// Three pieces hanging on the rail, at slightly different drops.
+const railPicks = [
+  { id: "1", drop: "mt-4" },
+  { id: "27", drop: "mt-14" },
+  { id: "12", drop: "mt-0" },
+];
+
+const onRail = railPicks.map(({ id, drop }) => ({
+  product: mockProducts.find((p) => p.id === id)!,
+  drop,
+}));
 
 export default function HeroSection() {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // GSAP context for safe React cleaning
-    const ctx = gsap.context(() => {
-      // 1. Entrance timeline
-      const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
-
-      tl.from(".hero-label", { opacity: 0, x: -30, duration: 1.0 })
-        .from(".hero-title", { opacity: 0, y: 50, duration: 1.2 }, "-=0.8")
-        .from(".hero-desc", { opacity: 0, y: 35, duration: 1.0 }, "-=0.9")
-        .from(".hero-cta", { opacity: 0, y: 25, duration: 0.9 }, "-=0.8")
-        .from(".hero-stat-item", { opacity: 0, y: 20, stagger: 0.15, duration: 0.8 }, "-=0.6")
-        .from(".hero-3d-container", { opacity: 0, scale: 0.8, duration: 1.5, ease: "back.out(1.2)" }, "-=1.0");
-
-      // 2. Parallax Scroll effect on text as page is scrolled
-      gsap.to(".hero-text-content", {
-        yPercent: -12,
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top top",
-          end: "bottom top",
-          scrub: true,
-        },
-      });
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, []);
-
   return (
-    <section ref={containerRef} className="relative min-h-screen flex items-center overflow-hidden bg-charcoal">
-      {/* Background ambient gradient */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-rose/5 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-sage/5 rounded-full blur-[100px]" />
-      </div>
+    <section className="relative bg-paper pt-28 pb-20 md:pt-36 md:pb-28">
+      <div className="max-w-7xl mx-auto px-6 md:px-10 grid md:grid-cols-12 gap-14 md:gap-8 items-end">
+        <div className="md:col-span-6 lg:col-span-5">
+          <h1 className="font-display text-[2.75rem] leading-[1.02] sm:text-6xl lg:text-[4.75rem] font-normal tracking-[-0.02em] text-ink">
+            Wear it to the wedding.
+            <span className="block italic text-rose-ink">Send it back on Monday.</span>
+          </h1>
 
-      <div className="relative max-w-7xl mx-auto px-6 md:px-10 pt-24 pb-16 w-full">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          {/* Left: Text */}
-          <div className="flex flex-col gap-6 hero-text-content">
-            <div className="flex items-center gap-3 hero-label">
-              <div className="w-8 h-px bg-rose" />
-              <span className="text-xs uppercase tracking-[0.25em] text-rose font-medium">
-                Circular Fashion
-              </span>
-            </div>
+          <p className="mt-7 text-base md:text-lg text-ink/75 max-w-md leading-relaxed">
+            Rent designer pieces by the day, for three days, or for the week.
+            It arrives cleaned and pressed, and the return bag is already in
+            the box.
+          </p>
 
-            <h1 className="font-display hero-title text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05] text-parchment text-balance">
-              Your wardrobe,
-              <br />
-              <em className="text-rose">infinitely</em>
-              <br />
-              renewed.
-            </h1>
-
-            <p className="text-parchment hero-desc text-base md:text-lg leading-relaxed max-w-sm">
-              Wear designer pieces for any occasion. Return when done. Someone
-              else&apos;s wardrobe becomes yours — and yours becomes theirs.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-3 pt-2 hero-cta">
-              <Link
-                href="/shop"
-                className="inline-flex items-center justify-center gap-2 bg-rose text-charcoal font-semibold text-sm px-7 py-3.5 rounded hover:bg-rose-dark transition-colors group"
-              >
-                Browse the Edit
-                <ArrowRight
-                  size={16}
-                  className="group-hover:translate-x-1 transition-transform"
-                />
-              </Link>
-              <Link
-                href="/how-it-works"
-                className="inline-flex items-center justify-center gap-2 border border-parchment/20 text-parchment/70 hover:text-parchment hover:border-parchment/50 font-medium text-sm px-7 py-3.5 rounded transition-colors"
-              >
-                How it works
-              </Link>
-            </div>
-
-            {/* Stats */}
-            <div className="flex gap-8 pt-4 border-t border-parchment/10">
-              {[
-                { value: "2,400+", label: "Pieces" },
-                { value: "180+", label: "Brands" },
-                { value: "Save 90%", label: "vs Retail" },
-              ].map(({ value, label }) => (
-                <div key={label} className="hero-stat-item">
-                  <p className="font-display text-xl font-semibold text-parchment">
-                    {value}
-                  </p>
-                  <p className="text-xs text-parchment/40 mt-0.5">{label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Right: Three.js Interactive Möbius Loop Canvas */}
-          <div className="relative flex items-center justify-center hero-3d-container">
-            <ThreeLoop />
+          <div className="mt-9 flex flex-wrap items-center gap-x-8 gap-y-4">
+            <Link
+              href="/shop"
+              className={buttonClass()}
+            >
+              See what&apos;s on the rail
+            </Link>
+            <Link
+              href="/how-it-works"
+              className="text-sm text-ink underline underline-offset-[6px] decoration-ink/30 hover:decoration-ink transition-colors"
+            >
+              How renting works
+            </Link>
           </div>
         </div>
-      </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-parchment/30">
-        <span className="text-xs tracking-widest uppercase">Scroll</span>
-        <div className="w-px h-8 bg-parchment/20 relative overflow-hidden">
-          <div className="absolute top-0 w-full h-1/2 bg-parchment/60 animate-bounce" />
+        {/* The rail */}
+        <div className="md:col-span-6 lg:col-span-6 lg:col-start-7">
+          <div className="relative">
+            <div className="h-[3px] rounded-full bg-ink/80" aria-hidden />
+            <ul className="grid grid-cols-3 gap-3 sm:gap-5 px-2 sm:px-6">
+              {onRail.map(({ product, drop }) => (
+                <li key={product.id} className={`flex flex-col items-center ${drop}`}>
+                  <span className="w-px h-6 bg-ink/50" aria-hidden />
+                  <Link href={`/shop/${product.id}`} className="group block w-full">
+                    <div className="relative aspect-[3/4] bg-white rounded-sm overflow-hidden shadow-[0_1px_0_rgba(0,0,0,0.06),0_12px_24px_-16px_rgba(0,0,0,0.35)]">
+                      <Image
+                        src={product.images[0]}
+                        alt={product.name}
+                        fill
+                        priority
+                        sizes="(max-width: 768px) 30vw, 200px"
+                        className="object-contain p-2 group-hover:scale-[1.03] transition-transform duration-500"
+                      />
+                    </div>
+                    <div className="mt-3 border-l-2 border-rose pl-2.5">
+                      <p className="text-[11px] sm:text-xs text-ink/60">{product.brand}</p>
+                      <p className="text-xs sm:text-sm text-ink leading-snug group-hover:underline underline-offset-2">
+                        {product.name}
+                      </p>
+                      <p className="mt-1 text-xs text-ink/70 tabular-nums">
+                        {formatPrice(product.rentalPrice.per3Days)}{" "}
+                        <span className="text-ink/70">for 3 days</span>
+                      </p>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </section>

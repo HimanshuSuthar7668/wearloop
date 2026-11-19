@@ -1,155 +1,57 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { Search, Package, RotateCcw } from "lucide-react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Link from "next/link";
+import { useReveal } from "@/hooks/useReveal";
 
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
-
-const steps = [
+const timeline = [
   {
-    icon: Search,
-    number: "01",
-    title: "Pick your pieces",
-    description:
-      "Browse 2,400+ items from 180+ premium brands. Filter by occasion, size, and duration. Add your favourites to the loop.",
+    when: "Today",
+    title: "Pick a piece and a size",
+    body: "Choose how long you need it: one day, three, or a week. The price is the price; there's no subscription to cancel later.",
   },
   {
-    icon: Package,
-    number: "02",
-    title: "Delivered to your door",
-    description:
-      "We dry-clean and deliver each piece in a reusable garment bag within 24 hours of your rental start date.",
+    when: "Within 24 hours",
+    title: "It turns up ready to wear",
+    body: "Dry-cleaned, pressed and folded into a reusable garment bag.",
   },
   {
-    icon: RotateCcw,
-    number: "03",
-    title: "Return & repeat",
-    description:
-      "Done wearing it? Drop it back in the pre-paid return bag. No cleaning needed — we handle everything.",
+    when: "When you're done",
+    title: "Put it back in the bag",
+    body: "Seal the prepaid return bag and hand it to the courier. Don't wash it; cleaning is our job.",
   },
 ];
 
 export default function HowItWorksSection() {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      gsap.registerPlugin(ScrollTrigger);
-    }
-
-    const ctx = gsap.context(() => {
-      // 1. Header fade-in
-      gsap.fromTo(
-        ".how-it-works-header > *",
-        { opacity: 0, y: 30 },
-        {
-          opacity: 1,
-          y: 0,
-          stagger: 0.15,
-          duration: 0.8,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: ".how-it-works-header",
-            start: "top 85%",
-            toggleActions: "play none none none",
-          },
-        },
-      );
-
-      // 2. Connector line drawing
-      gsap.to(".step-connector-progress", {
-        scaleX: 1,
-        ease: "power1.inOut",
-        scrollTrigger: {
-          trigger: ".steps-container",
-          start: "top 75%",
-          end: "bottom 65%",
-          scrub: 1.2,
-        },
-      });
-
-      // 3. Step cards stagger reveal
-      gsap.fromTo(
-        ".step-card",
-        { opacity: 0, y: 45, scale: 0.96 },
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          stagger: 0.2,
-          duration: 0.8,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: ".steps-container",
-            start: "top 75%",
-            toggleActions: "play none none none",
-          },
-        },
-      );
-    }, containerRef);
-
-    // Refresh ScrollTrigger to calculate correct positions after mounting
-    const refreshTimer = setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 100);
-
-    return () => {
-      ctx.revert();
-      clearTimeout(refreshTimer);
-    };
-  }, []);
+  const ref = useReveal<HTMLElement>();
 
   return (
-    <section
-      ref={containerRef}
-      className="py-24 bg-charcoal-light overflow-hidden"
-    >
-      <div className="max-w-7xl mx-auto px-6 md:px-10">
-        <div className="text-center mb-16 how-it-works-header">
-          <p className="text-xs uppercase tracking-[0.25em] text-rose mb-3">
-            Simple by design
-          </p>
-          <h2 className="font-display text-4xl md:text-5xl font-bold text-parchment">
-            Fashion in three steps
+    <section ref={ref} className="bg-paper-2 py-20 md:py-28">
+      <div className="max-w-7xl mx-auto px-6 md:px-10 grid md:grid-cols-12 gap-12">
+        <div className="md:col-span-4" data-reveal>
+          <h2 className="font-display text-3xl md:text-4xl font-normal tracking-[-0.01em] text-ink">
+            How a rental goes
           </h2>
+          <p className="mt-4 text-ink/70 max-w-xs leading-relaxed">
+            Most people ask the same three questions. Here&apos;s the short
+            version.
+          </p>
+          <Link
+            href="/how-it-works"
+            className="mt-6 inline-block text-sm text-ink underline underline-offset-[6px] decoration-ink/30 hover:decoration-ink transition-colors"
+          >
+            The long version
+          </Link>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 md:gap-12 relative steps-container">
-          {/* Connector line (desktop only) */}
-          <div className="hidden md:block absolute -top-10 left-[calc(16.67%)] right-[calc(16.67%)] h-[2px] bg-parchment/10 overflow-hidden rounded-full">
-            <div className="step-connector-progress w-full h-full bg-gradient-to-r from-rose via-rose to-sage origin-left scale-x-0" />
-          </div>
-
-          {steps.map(({ icon: Icon, number, title, description }) => (
-            <div
-              key={number}
-              className="relative flex flex-col items-start gap-5 p-8 rounded-2xl border border-parchment/8 hover:border-rose/40 transition-all duration-300 bg-charcoal/40 step-card group"
-            >
-              {/* Step number */}
-              <span className="absolute top-6 right-6 font-display text-5xl font-bold text-parchment/[0.04] group-hover:text-rose/10 group-hover:scale-105 transition-all duration-300 select-none">
-                {number}
-              </span>
-
-              {/* Icon */}
-              <div className="w-12 h-12 rounded-xl bg-rose/10 border border-rose/20 flex items-center justify-center group-hover:bg-rose/20 group-hover:border-rose/40 transition-colors duration-300">
-                <Icon size={20} className="text-rose" />
-              </div>
-
-              <div>
-                <h3 className="font-display text-xl font-semibold text-parchment mb-2 group-hover:text-parchment transition-colors duration-300">
-                  {title}
-                </h3>
-                <p className="text-sm text-parchment/50 leading-relaxed group-hover:text-parchment/70 transition-colors duration-300">
-                  {description}
-                </p>
-              </div>
-            </div>
+        <ol className="md:col-span-8 grid sm:grid-cols-3 gap-x-8">
+          {timeline.map(({ when, title, body }) => (
+            <li key={when} className="border-t border-ink/25 pt-5 pb-8" data-reveal>
+              <p className="text-xs font-medium uppercase tracking-wider text-rose-ink">{when}</p>
+              <h3 className="mt-3 font-display text-xl text-ink leading-snug">{title}</h3>
+              <p className="mt-2 text-sm text-ink/70 leading-relaxed">{body}</p>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
     </section>
   );

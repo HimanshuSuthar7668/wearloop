@@ -1,34 +1,13 @@
-import Link from "next/link";
-import { Ruler, Shield, MessageCircleQuestion, ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
+import { PageHeader, Section, RuledList, PageFooterNote, ButtonLink } from "@/components/ui/Page";
 
-export const metadata: Metadata = {
-  title: "Sizing Guide — Find Your Perfect Fit",
+export const metadata: Metadata = pageMetadata({
+  title: "Size guide",
   description:
-    "Find your perfect fit with WearLoop's sizing guide. International size chart, measuring tips, between-size advice, and our Fit Guarantee on every order.",
-  keywords: [
-    "WearLoop size guide",
-    "fashion rental sizing",
-    "clothes size chart India",
-    "designer size guide",
-    "fit guarantee fashion rental",
-  ],
-  alternates: {
-    canonical: "https://www.wearloop.in/sizing",
-  },
-  openGraph: {
-    title: "Sizing Guide — Find Your Perfect Fit | WearLoop",
-    description:
-      "International size chart, measuring tips, and our Fit Guarantee. Get the right fit every time — or we'll replace it free.",
-    url: "https://www.wearloop.in/sizing",
-    type: "website",
-  },
-  twitter: {
-    title: "Sizing Guide — Find Your Perfect Fit | WearLoop",
-    description:
-      "International size chart, measuring tips, and our Fit Guarantee. Get the right fit every time — or we'll replace it free.",
-  },
-};
+    "Body measurements for every WearLoop size, how to choose between two sizes, and our Fit Guarantee.",
+  path: "/sizing",
+});
 
 const sizeChart = [
   {
@@ -96,108 +75,69 @@ const sizeChart = [
 const tips = [
   {
     title: "Between two sizes?",
-    description:
-      "For structured pieces like blazers and fitted dresses, size up for comfort and easier movement. For flowy, relaxed silhouettes, size down for a more tailored silhouette.",
+    body: "For structured pieces like blazers and fitted dresses, go up a size so you can move. For loose, flowing cuts, go down for a neater shape.",
   },
   {
-    title: "Check the product page notes",
-    description:
-      "Many listings include a designer-specific note if a piece runs small, large, or true-to-size based on member feedback and our own fit testing.",
+    title: "Read the note on the product page",
+    body: "If a piece runs small, large or long, the listing says so. Those notes come from our own fittings and from members.",
   },
   {
-    title: "Use your saved measurements",
-    description:
-      "Add your measurements to your account once, and we'll highlight recommended sizes across the entire collection automatically.",
+    title: "Save your measurements",
+    body: "Add them to your account once and we'll mark the size that suits you on every product.",
   },
   {
-    title: "Read recent member reviews",
-    description:
-      "Reviews on each product page often mention the reviewer's usual size and how a specific piece fit them — a quick, real-world sanity check.",
+    title: "Check the reviews",
+    body: "Reviewers often mention their usual size and how a piece fitted them, which is the most useful check there is.",
   },
 ];
 
 export default function SizingPage() {
   return (
-    <div className="min-h-screen pt-20">
-      {/* Hero */}
-      <section className="max-w-4xl mx-auto px-6 md:px-10 py-16 text-center">
-        <p className="text-xs uppercase tracking-[0.25em] text-[#c9a898] mb-4">
-          Find your fit
-        </p>
-        <h1 className="font-display text-5xl md:text-6xl font-bold text-parchment mb-5 text-balance">
-          Sizing, made
-          <br />
-          <em className="not-italic text-[#c9a898]">simple.</em>
-        </h1>
-        <p className="text-parchment/50 text-lg max-w-lg mx-auto">
-          Our sizes reflect how each piece actually fits, not just a label.
-          Here&apos;s how to pick the right one — and what happens if you don&apos;t.
-        </p>
-      </section>
+    <div className="pt-20">
+      <PageHeader
+        title="Pick a size with confidence."
+        intro="Labels vary between brands, so we measure every piece ourselves. Here's how to choose, and what happens if it still doesn't fit."
+      />
 
-      {/* How sizing works */}
-      <section className="max-w-3xl mx-auto px-6 md:px-10 pb-16">
-        <div className="flex items-start gap-5 p-8 rounded-2xl border border-parchment/8 bg-charcoal-light">
-          <div className="shrink-0 w-12 h-12 rounded-xl bg-rose/10 border border-rose/20 flex items-center justify-center">
-            <Ruler size={20} className="text-[#c9a898]" />
-          </div>
-          <div>
-            <h2 className="font-display text-lg font-semibold text-parchment mb-2">
-              How WearLoop sizing works
-            </h2>
-            <p className="text-sm text-parchment/50 leading-relaxed">
-              Every piece is sized using the designer&apos;s own measurements,
-              which we independently verify against the physical garment
-              before it enters our collection. Because fit can vary between
-              brands and cuts, we use the size chart below as a general
-              guide, and product pages call out anything that runs
-              noticeably tight, loose, or long.
-            </p>
-          </div>
+      <Section
+        title="How we size"
+        aside="We check the designer's measurements against the actual garment before it joins the collection."
+      >
+        <p className="max-w-2xl text-ink/80 leading-relaxed">
+          Fit varies between brands and cuts, so treat the chart below as a
+          starting point. Product pages flag anything that runs noticeably
+          tight, loose or long.
+        </p>
+      </Section>
+
+      <section className="max-w-7xl mx-auto px-6 md:px-10 pb-16 md:pb-20">
+        <div className="flex items-baseline justify-between gap-6 mb-6">
+          <h2 className="font-display text-2xl md:text-3xl text-ink">Size chart</h2>
+          <p className="text-sm text-ink/60">Body measurements, cm / in</p>
         </div>
-      </section>
-
-      {/* Size chart */}
-      <section className="max-w-5xl mx-auto px-6 md:px-10 pb-20">
-        <h2 className="font-display text-3xl font-bold text-parchment text-center mb-4">
-          Size chart
-        </h2>
-        <p className="text-parchment/50 text-center max-w-lg mx-auto mb-10">
-          Approximate body measurements for each size. All ranges are
-          guidelines — always check individual product notes for
-          designer-specific fit.
-        </p>
-        <div className="overflow-x-auto rounded-2xl border border-parchment/10">
-          <table className="w-full text-sm text-left border-collapse min-w-[720px]">
+        <div className="overflow-x-auto border-y border-ink/20">
+          <table className="w-full text-sm text-left border-collapse min-w-[720px] tabular-nums">
             <thead>
-              <tr className="bg-charcoal-light text-parchment/40 text-xs uppercase tracking-wider">
-                <th className="px-5 py-4 font-medium">Size</th>
-                <th className="px-5 py-4 font-medium">US</th>
-                <th className="px-5 py-4 font-medium">UK</th>
-                <th className="px-5 py-4 font-medium">EU</th>
-                <th className="px-5 py-4 font-medium">Bust (cm / in)</th>
-                <th className="px-5 py-4 font-medium">Waist (cm / in)</th>
-                <th className="px-5 py-4 font-medium">Hip (cm / in)</th>
+              <tr className="text-ink/60 text-xs border-b border-ink/20">
+                <th className="py-3 pr-5 font-medium">Size</th>
+                <th className="py-3 px-5 font-medium">US</th>
+                <th className="py-3 px-5 font-medium">UK</th>
+                <th className="py-3 px-5 font-medium">EU</th>
+                <th className="py-3 px-5 font-medium">Bust</th>
+                <th className="py-3 px-5 font-medium">Waist</th>
+                <th className="py-3 px-5 font-medium">Hip</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-parchment/10">
+            <tbody className="divide-y divide-ink/10">
               {sizeChart.map((row) => (
-                <tr key={row.size} className="hover:bg-charcoal-light/50 transition-colors">
-                  <td className="px-5 py-4 font-display font-semibold text-parchment">
-                    {row.size}
-                  </td>
-                  <td className="px-5 py-4 text-parchment/60">{row.us}</td>
-                  <td className="px-5 py-4 text-parchment/60">{row.uk}</td>
-                  <td className="px-5 py-4 text-parchment/60">{row.eu}</td>
-                  <td className="px-5 py-4 text-parchment/60">
-                    {row.bustCm} / {row.bustIn}
-                  </td>
-                  <td className="px-5 py-4 text-parchment/60">
-                    {row.waistCm} / {row.waistIn}
-                  </td>
-                  <td className="px-5 py-4 text-parchment/60">
-                    {row.hipCm} / {row.hipIn}
-                  </td>
+                <tr key={row.size}>
+                  <td className="py-4 pr-5 font-display text-base text-ink">{row.size}</td>
+                  <td className="py-4 px-5 text-ink/80">{row.us}</td>
+                  <td className="py-4 px-5 text-ink/80">{row.uk}</td>
+                  <td className="py-4 px-5 text-ink/80">{row.eu}</td>
+                  <td className="py-4 px-5 text-ink/80">{row.bustCm} / {row.bustIn}</td>
+                  <td className="py-4 px-5 text-ink/80">{row.waistCm} / {row.waistIn}</td>
+                  <td className="py-4 px-5 text-ink/80">{row.hipCm} / {row.hipIn}</td>
                 </tr>
               ))}
             </tbody>
@@ -205,60 +145,23 @@ export default function SizingPage() {
         </div>
       </section>
 
-      {/* Tips */}
-      <section className="bg-charcoal-light border-y border-parchment/10 py-20">
-        <div className="max-w-5xl mx-auto px-6 md:px-10">
-          <h2 className="font-display text-3xl font-bold text-parchment text-center mb-12">
-            Tips for choosing between two sizes
-          </h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            {tips.map(({ title, description }) => (
-              <div
-                key={title}
-                className="p-8 rounded-2xl border border-parchment/10 bg-charcoal hover:border-parchment/20 transition-colors"
-              >
-                <h3 className="font-display text-base font-semibold text-parchment mb-2 flex items-center gap-2">
-                  <MessageCircleQuestion size={16} className="text-sage shrink-0" />
-                  {title}
-                </h3>
-                <p className="text-sm text-parchment/50 leading-relaxed">
-                  {description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <Section title="Choosing between sizes" tinted>
+        <RuledList items={tips} />
+      </Section>
 
-      {/* Fit guarantee */}
-      <section className="max-w-3xl mx-auto px-6 md:px-10 py-24 text-center">
-        <div className="w-12 h-12 rounded-xl bg-sage/10 border border-sage/20 flex items-center justify-center mx-auto mb-6">
-          <Shield size={20} className="text-sage" />
-        </div>
-        <h2 className="font-display text-2xl font-semibold text-parchment mb-4">
-          Backed by our Fit Guarantee
-        </h2>
-        <p className="text-parchment/50 leading-relaxed">
-          Sizing guides only get you so far — sometimes a piece just doesn&apos;t
-          work on you. That&apos;s why every order includes our Fit Guarantee: if
-          something doesn&apos;t fit, tell us within 2 hours of delivery and we&apos;ll
-          send a free replacement or credit your account in full.
+      <Section title="The Fit Guarantee">
+        <p className="max-w-2xl text-ink/80 leading-relaxed">
+          A chart only goes so far. If something doesn&apos;t fit, tell us
+          within 2 hours of delivery and we&apos;ll send a replacement or put
+          the full amount back in your account.
         </p>
-      </section>
+      </Section>
 
-      {/* CTA */}
-      <section className="max-w-7xl mx-auto px-6 md:px-10 pb-24 text-center">
-        <p className="font-display text-2xl font-semibold text-parchment mb-4">
-          Not sure which size to pick?
-        </p>
-        <Link
-          href="/contact"
-          className="inline-flex items-center gap-2 bg-rose text-charcoal font-semibold text-sm px-8 py-4 rounded-lg hover:bg-rose-dark transition-colors group"
-        >
-          Ask our styling team
-          <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-        </Link>
-      </section>
+      <PageFooterNote
+        title="Still unsure?"
+        body="Tell us what you're looking at and your usual size."
+        action={<ButtonLink href="/contact">Ask our stylists</ButtonLink>}
+      />
     </div>
   );
 }

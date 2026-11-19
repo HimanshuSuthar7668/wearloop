@@ -2,124 +2,64 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --font-montserrat: "Montserrat", sans-serif, system-ui;
-  --font-inter: "Inter", sans-serif, system-ui;
-
-  --background: 0 0% 100%;
-  --foreground: 0 0% 3.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 3.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 3.9%;
-  --primary: 0 0% 9%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 0 0% 96.1%;
-  --secondary-foreground: 0 0% 9%;
-  --muted: 0 0% 96.1%;
-  --muted-foreground: 0 0% 45.1%;
-  --accent: 0 0% 96.1%;
-  --accent-foreground: 0 0% 9%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 89.8%;
-  --input: 0 0% 89.8%;
-  --ring: 0 0% 3.9%;
-  --chart-1: 12 76% 61%;
-  --chart-2: 173 58% 39%;
-  --chart-3: 197 37% 24%;
-  --chart-4: 43 74% 66%;
-  --chart-5: 27 87% 67%;
-  --radius: 0.5rem;
-}
-
 @layer base {
-  * {
-    box-sizing: border-box;
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  :root {
+    --font-inter: "Inter", system-ui, sans-serif;
+
+    /* paper = page background, ink = text. The *-ink accents are the
+       readable-on-background versions, so they get lighter in dark mode. */
+    --paper: 245 240 232;
+    --paper-2: 236 229 216;
+    --ink: 26 26 46;
+    --ink-2: 37 37 64;
+    --rose: 201 168 152;
+    --rose-ink: 150 104 86;
+    --sage: 138 158 140;
+    --sage-ink: 82 102 84;
+    --mist: 212 207 200;
   }
 
-  :root {
-    /* Light Theme (Default) */
-    --charcoal: 245 240 232;
-    --charcoal-light: 232 224 208;
-    --parchment: 26 26 46;
-    --parchment-dark: 37 37 64;
+  html.dark {
+    --paper: 26 26 46;
+    --paper-2: 37 37 64;
+    --ink: 245 240 232;
+    --ink-2: 232 224 208;
     --rose: 201 168 152;
-    --rose-dark: 184 144 126;
+    --rose-ink: 209 176 160;
     --sage: 138 158 140;
-    --sage-dark: 107 125 109;
+    --sage-ink: 162 184 164;
     --mist: 212 207 200;
   }
 
   html {
     scroll-behavior: smooth;
-    background-color: rgb(var(--charcoal));
-    color: rgb(var(--parchment));
+    background-color: rgb(var(--paper));
+    color: rgb(var(--ink));
   }
 
-  html.dark {
-    /* Dark Theme */
-    --charcoal: 26 26 46;
-    --charcoal-light: 37 37 64;
-    --parchment: 245 240 232;
-    --parchment-dark: 232 224 208;
-    --rose: 201 168 152;
-    --rose-dark: 184 144 126;
-    --sage: 138 158 140;
-    --sage-dark: 107 125 109;
-    --mist: 212 207 200;
+  /* One visible focus style for links and other native controls. Buttons and inputs
+     set their own ring via the shared components. */
+  a:focus-visible,
+  summary:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 2px solid rgb(var(--ink));
+    outline-offset: 3px;
+    border-radius: 2px;
   }
 
   body {
-    font-family: var(--font-montserrat);
-    font-weight: 400;
+    transition: background-color 0.25s ease, color 0.25s ease;
     -webkit-font-smoothing: antialiased;
   }
 }
 
 @layer utilities {
   .font-display {
-    font-family: var(--font-montserrat);
+    font-family: var(--font-display), Georgia, serif;
+    font-variation-settings: "SOFT" 50;
   }
 
   .text-balance {
     text-wrap: balance;
-  }
-
-  /* Circular rotating text path */
-  .rotate-text {
-    animation: spin 20s linear infinite;
-    transform-origin: center;
-  }
-
-  /* Glass card effect */
-  .glass {
-    background: rgba(245, 240, 232, 0.04);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(245, 240, 232, 0.08);
-  }
-
-  /* Grain texture overlay */
-  .grain::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none;
-    opacity: 0.4;
-  }
-
-  .animate-delay-100 {
-    animation-delay: 100ms;
-  }
-  .animate-delay-200 {
-    animation-delay: 200ms;
-  }
-  .animate-delay-300 {
-    animation-delay: 300ms;
-  }
-  .animate-delay-400 {
-    animation-delay: 400ms;
   }
 }

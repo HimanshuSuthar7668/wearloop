@@ -1,228 +1,106 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { ArrowRight, Leaf, Users, Repeat } from "lucide-react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { buttonClass } from "@/components/ui/Button";
+import { useReveal } from "@/hooks/useReveal";
 
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
-
-const values = [
+const beliefs = [
   {
-    icon: Repeat,
-    title: "Circular by design",
+    title: "Buy less, choose well",
     description:
-      "Every piece in our collection is chosen for its durability and timelessness. We design our entire service around maximising the life and love a garment receives.",
+      "We only take pieces we think will survive dozens of rentals. Fast fashion doesn't make it onto the rail, however popular it is.",
   },
   {
-    icon: Leaf,
-    title: "Sustainability, not greenwashing",
+    title: "Show the working",
     description:
-      "We track the environmental impact of every rental. Our packaging is 100% reusable, our cleaning uses waterless processes, and our fleet runs on electric vehicles.",
+      "We log the impact of every rental. Packaging is reusable, cleaning is waterless where possible, and deliveries run on electric vehicles.",
   },
   {
-    icon: Users,
-    title: "Community, not consumption",
+    title: "Share the wardrobe",
     description:
-      "WearLoop is built on the idea that fashion is more joyful when shared. Our members aren't customers — they're co-owners of a shared wardrobe.",
+      "The dress you wore last month is now at someone's sangeet in another city. We like that, and we think you will too.",
   },
 ];
 
-const impactStats = [
-  { value: "48,000+", label: "Rentals completed" },
-  { value: "156 tonnes", label: "Textile waste prevented" },
-  { value: "12,000+", label: "Members" },
-  { value: "4.8/5", label: "Average rating" },
+const numbers = [
+  { value: "48,000+", label: "rentals completed" },
+  { value: "156 t", label: "textile waste prevented" },
+  { value: "12,000+", label: "members" },
+  { value: "4.8 / 5", label: "average rating" },
 ];
 
 export default function AboutPageContent() {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      // Hero entrance
-      gsap.from(".about-hero > *", {
-        opacity: 0,
-        y: 30,
-        stagger: 0.12,
-        duration: 0.9,
-        ease: "power3.out",
-      });
-
-      // Story text reveal on scroll
-      gsap.from(".about-story > *", {
-        opacity: 0,
-        y: 25,
-        stagger: 0.15,
-        duration: 0.8,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: ".about-story",
-          start: "top 85%",
-          toggleActions: "play none none none",
-        },
-      });
-
-      // Value cards stagger
-      gsap.from(".about-value-card", {
-        opacity: 0,
-        y: 40,
-        scale: 0.97,
-        stagger: 0.15,
-        duration: 0.8,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: ".about-values-grid",
-          start: "top 80%",
-          toggleActions: "play none none none",
-        },
-      });
-
-      // Impact counters — count up on scroll into view
-      gsap.utils.toArray<HTMLElement>(".about-stat-value").forEach((el) => {
-        const raw = el.dataset.value || "0";
-        const numericMatch = raw.match(/[\d,]+(\.\d+)?/);
-        if (!numericMatch) return;
-
-        const numeric = parseFloat(numericMatch[0].replace(/,/g, ""));
-        const prefix = raw.slice(0, numericMatch.index);
-        const suffix = raw.slice((numericMatch.index || 0) + numericMatch[0].length);
-        const hasComma = numericMatch[0].includes(",");
-        const counter = { value: 0 };
-
-        gsap.to(counter, {
-          value: numeric,
-          duration: 1.6,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: el,
-            start: "top 90%",
-            toggleActions: "play none none none",
-          },
-          onUpdate: () => {
-            const rounded =
-              numeric % 1 !== 0 ? counter.value.toFixed(1) : Math.round(counter.value).toString();
-            const formatted = hasComma
-              ? Number(rounded).toLocaleString("en-IN")
-              : rounded;
-            el.innerText = `${prefix}${formatted}${suffix}`;
-          },
-        });
-      });
-
-      // CTA reveal
-      gsap.from(".about-cta", {
-        opacity: 0,
-        y: 20,
-        duration: 0.8,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: ".about-cta",
-          start: "top 90%",
-          toggleActions: "play none none none",
-        },
-      });
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, []);
+  const heroRef = useReveal<HTMLElement>();
+  const beliefsRef = useReveal<HTMLElement>();
 
   return (
-    <div ref={containerRef} className="min-h-screen pt-20">
-      {/* Hero */}
-      <section className="max-w-4xl mx-auto px-6 md:px-10 pt-16 pb-12 text-center about-hero">
-        <p className="text-xs uppercase tracking-[0.25em] text-[#c9a898] mb-4">
-          Our story
-        </p>
-        <h1 className="font-display text-5xl md:text-6xl font-bold text-parchment mb-6 text-balance">
-          We built the wardrobe
-          <br />
-          <em className="not-italic text-[#c9a898]">the planet needed.</em>
+    <div className="pt-20">
+      <section ref={heroRef} className="max-w-7xl mx-auto px-6 md:px-10 pt-16 pb-16 md:pt-24 grid md:grid-cols-12 gap-10">
+        <h1
+          className="md:col-span-7 font-display text-[2.75rem] leading-[1.04] md:text-6xl font-normal tracking-[-0.02em] text-ink text-balance"
+          data-reveal
+        >
+          Three friends, one group chat, and too many outfits worn once.
         </h1>
-        <p className="text-parchment/50 text-lg leading-relaxed max-w-xl mx-auto">
-          WearLoop started with a simple observation: the average piece of
-          clothing is worn just 7 times before being discarded. We thought we
-          could do better.
-        </p>
-      </section>
 
-      {/* Story */}
-      <section className="max-w-3xl mx-auto px-6 md:px-10 py-12">
-        <div className="prose prose-invert max-w-none about-story">
-          <p className="text-parchment/60 leading-loose text-base border-l-2 border-rose/30 pl-6">
-            Founded in 2023, WearLoop began as a small shared wardrobe between
-            three friends who were tired of buying new outfits for every event.
-            What started as a group chat became a platform, and today we serve
-            thousands of members across India.
+        <div className="md:col-span-5 md:pt-3 space-y-5 text-ink/75 leading-relaxed" data-reveal>
+          <p>
+            WearLoop started in 2023 as a shared wardrobe between three friends
+            who were tired of buying something new for every wedding, launch
+            and dinner. The average piece of clothing gets worn about seven
+            times before it&apos;s thrown away. Ours were doing worse.
           </p>
-          <p className="text-parchment/60 leading-loose text-base mt-6">
-            We partner directly with premium brands and independent designers to
-            build a collection that&apos;s worth wearing — and worth sharing. Every
-            piece is selected not just for style, but for how long it will last in
-            the loop.
+          <p>
+            The group chat turned into a spreadsheet, then a waitlist, then
+            this. We now work directly with premium labels and independent
+            designers, and we pick each piece for how long it will last as
+            much as how it looks.
           </p>
         </div>
       </section>
 
-      {/* Values */}
-      <section className="bg-charcoal-light border-y border-parchment/10 py-20">
-        <div className="max-w-7xl mx-auto px-6 md:px-10">
-          <h2 className="font-display text-3xl font-bold text-parchment text-center mb-12">
-            What we stand for
+      <section ref={beliefsRef} className="bg-paper-2 py-20 md:py-24">
+        <div className="max-w-7xl mx-auto px-6 md:px-10 grid md:grid-cols-12 gap-12">
+          <h2 className="md:col-span-4 font-display text-3xl md:text-4xl font-normal text-ink" data-reveal>
+            What we try to do
           </h2>
-          <div className="grid md:grid-cols-3 gap-6 about-values-grid">
-            {values.map(({ icon: Icon, title, description }) => (
-              <div
-                key={title}
-                className="about-value-card p-8 rounded-2xl border border-parchment/8 hover:border-parchment/20 transition-colors"
-              >
-                <div className="w-12 h-12 rounded-xl bg-rose/10 border border-rose/20 flex items-center justify-center mb-5">
-                  <Icon size={20} className="text-[#c9a898]" />
-                </div>
-                <h3 className="font-display text-lg font-semibold text-parchment mb-3">
-                  {title}
-                </h3>
-                <p className="text-sm text-parchment/50 leading-relaxed">
-                  {description}
-                </p>
-              </div>
+          <ol className="md:col-span-8 divide-y divide-ink/15 border-y border-ink/15">
+            {beliefs.map(({ title, description }, i) => (
+              <li key={title} className="py-6 grid sm:grid-cols-[3rem_1fr_1.4fr] gap-x-6 gap-y-2" data-reveal>
+                <span className="text-sm text-ink/70 tabular-nums">{i + 1}.</span>
+                <h3 className="font-display text-xl text-ink">{title}</h3>
+                <p className="text-sm text-ink/70 leading-relaxed">{description}</p>
+              </li>
             ))}
-          </div>
+          </ol>
         </div>
       </section>
 
-      {/* Impact numbers */}
-      <section className="max-w-7xl mx-auto px-6 md:px-10 py-24 text-center">
-        <h2 className="font-display text-3xl font-bold text-parchment mb-14">
-          Our impact so far
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {impactStats.map(({ value, label }) => (
-            <div key={label} className="flex flex-col items-center gap-2">
-              <p
-                className="about-stat-value font-display text-4xl font-bold text-parchment"
-                data-value={value}
-              >
-                0
-              </p>
-              <p className="text-sm text-parchment/40">{label}</p>
+      <section className="max-w-7xl mx-auto px-6 md:px-10 py-20 md:py-24">
+        <dl className="grid grid-cols-2 md:grid-cols-4 gap-y-10 border-t border-ink/15 pt-8">
+          {numbers.map(({ value, label }) => (
+            <div key={label}>
+              <dt className="sr-only">{label}</dt>
+              <dd className="font-display text-4xl md:text-5xl text-ink tabular-nums">{value}</dd>
+              <dd className="mt-2 text-sm text-ink/60">{label}</dd>
             </div>
           ))}
-        </div>
-      </section>
+        </dl>
 
-      {/* CTA */}
-      <section className="pb-24 text-center px-6 about-cta">
-        <Link
-          href="/shop"
-          className="inline-flex items-center gap-2 bg-rose text-charcoal font-semibold text-sm px-8 py-4 rounded-lg hover:bg-rose-dark transition-colors group"
-        >
-          Join the loop
-          <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-        </Link>
+        <div className="mt-16 flex flex-wrap items-center gap-x-8 gap-y-4">
+          <Link
+            href="/shop"
+            className={buttonClass()}
+          >
+            Browse the collection
+          </Link>
+          <Link
+            href="/careers"
+            className="text-sm text-ink underline underline-offset-[6px] decoration-ink/30 hover:decoration-ink transition-colors"
+          >
+            We&apos;re hiring
+          </Link>
+        </div>
       </section>
     </div>
   );

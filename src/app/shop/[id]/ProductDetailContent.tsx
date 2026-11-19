@@ -1,465 +1,399 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Star, Heart, Calendar, Package, Shield, Edit, Trash2, X } from "lucide-react";
-import { formatPrice, getAuthUser, getAuthToken } from "@/lib/utils";
-import Button from "@/components/ui/Button";
+import { Heart, Star } from "lucide-react";
+import { formatPrice, getAuthToken, getAuthUser } from "@/lib/utils";
+import Button, { buttonClass } from "@/components/ui/Button";
+import { ChoiceGroup, Field, Input, focusFirstError } from "@/components/ui/Field";
 import AuthPromptModal from "@/components/ui/AuthPromptModal";
+import Dialog from "@/components/ui/Dialog";
+import ProductForm from "@/components/admin/ProductForm";
+import ProductCard from "@/components/ui/ProductCard";
 import { useAppStore } from "@/context/AppContext";
+import type { Product } from "@/types";
+import { categories, occasions } from "@/lib/mockData";
+import {
+  DURATIONS,
+  type Duration,
+  earliestStart,
+  fromISODate,
+  latestStart,
+  priceFor,
+  rentalSchedule,
+  shortDate,
+  toISODate,
+} from "@/lib/rental";
 
+const ALL_SIZES = ["XS", "S", "M", "L", "XL"];
 
 interface ProductDetailContentProps {
   productId: string;
+  /** Rendered on the server so the first paint (and search engines) get the full page. */
+  initialProduct?: Product;
 }
 
-export default function ProductDetailContent({ productId }: ProductDetailContentProps) {
-  const router = useRouter();
-  const { products, cart, addToCart, deleteProduct, updateProduct, favourites, addToFavourites, removeFromFavourites } = useAppStore();
-  const product = products.find((p) => p.id === productId);
+type Errors = Partial<Record<"size" | "date", string>>;
 
-  const [selectedSize, setSelectedSize] = useState("");
-  const [selectedDuration, setSelectedDuration] = useState<"perDay" | "per3Days" | "perWeek">("per3Days");
-  const isFavourited = favourites.includes(productId);
+export default function ProductDetailContent({ productId, initialProduct }: ProductDetailContentProps) {
+  const router = useRouter();
+  const {
+    loaded,
+    products,
+    cart,
+    addToCart,
+    deleteProduct,
+    updateProduct,
+    favourites,
+    addToFavourites,
+    removeFromFavourites,
+  } = useAppStore();
+  // Store data wins (it reflects admin edits); the server copy covers first paint and API hiccups.
+  const product = products.find((p) => p.id === productId) ?? initialProduct;
+
+  const [days, setDays] = useState<Duration>(3);
+  const [size, setSize] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [errors, setErrors] = useState<Errors>({});
+  const [justAdded, setJustAdded] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [addedSuccess, setAddedSuccess] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
-  // Edit form state
-  const [editName, setEditName] = useState("");
-  const [editBrand, setEditBrand] = useState("");
-  const [editDescription, setEditDescription] = useState("");
-  const [editRetailPrice, setEditRetailPrice] = useState(0);
-  const [editPerDay, setEditPerDay] = useState(0);
-  const [editPer3Days, setEditPer3Days] = useState(0);
-  const [editPerWeek, setEditPerWeek] = useState(0);
-
+  // Date limits depend on "today", so they're worked out in the browser.
+  const [dateBounds, setDateBounds] = useState<{ min: string; max: string } | null>(null);
   useEffect(() => {
-    const user = getAuthUser();
-    if (user?.role === "admin") {
-      setIsAdmin(true);
-    }
+    setDateBounds({ min: toISODate(earliestStart()), max: toISODate(latestStart()) });
+    setIsAdmin(getAuthUser()?.role === "admin");
   }, []);
 
-  useEffect(() => {
-    if (product) {
-      setEditName(product.name);
-      setEditBrand(product.brand);
-      setEditDescription(product.description);
-      setEditRetailPrice(product.retailPrice);
-      setEditPerDay(product.rentalPrice.perDay);
-      setEditPer3Days(product.rentalPrice.per3Days);
-      setEditPerWeek(product.rentalPrice.perWeek);
-    }
-  }, [product]);
+  const related = useMemo(() => {
+    if (!product) return [];
+    return products
+      .filter((p) => p.id !== product.id && p.available && (p.occasion === product.occasion || p.category === product.category))
+      .sort(
+        (a, b) =>
+          Number(b.occasion === product.occasion) - Number(a.occasion === product.occasion) || b.reviewCount - a.reviewCount,
+      )
+      .slice(0, 4);
+  }, [products, product]);
 
   const performAddToCart = useCallback(async () => {
-    if (!product || !selectedSize) return;
-
-    let days = 3;
-    if (selectedDuration === "perDay") days = 1;
-    if (selectedDuration === "perWeek") days = 7;
-
-    const added = await addToCart(product.id, selectedSize, days);
-    if (added) {
-      setAddedSuccess(true);
-      setTimeout(() => setAddedSuccess(false), 3000);
-    }
-  }, [product, selectedSize, selectedDuration, addToCart]);
+    if (!product) return;
+    const added = await addToCart(product.id, size, days, startDate);
+    if (added) setJustAdded(true);
+  }, [product, size, days, startDate, addToCart]);
 
   if (!product) {
+    if (!loaded) return <div className="min-h-screen pt-20" aria-busy="true" />;
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="font-display text-2xl text-parchment/40 mb-3">
-            Piece not found
-          </p>
-          <Link href="/shop" className="text-sm text-[#c9a898] hover:underline">
-            Back to shop
-          </Link>
-        </div>
+      <div className="min-h-[70vh] pt-32 max-w-7xl mx-auto px-6 md:px-10">
+        <h1 className="font-display text-3xl text-ink">We can&apos;t find that piece</h1>
+        <p className="mt-3 text-ink/75 max-w-md">It may have been retired from the collection, or the link is wrong.</p>
+        <Link href="/shop" className={buttonClass({ className: "mt-8" })}>
+          Browse the collection
+        </Link>
       </div>
     );
   }
 
-  const alreadyInCart = cart.some((item) => item.productId === product.id);
+  const isFavourited = favourites.includes(product.id);
+  const inBag = cart.some((item) => item.productId === product.id);
+  const price = priceFor(product, days);
+  const schedule = startDate ? rentalSchedule(startDate, days) : null;
+  const categoryLabel = categories.find((c) => c.id === product.category)?.label ?? "All pieces";
+  const occasion = occasions.find((o) => o.id === product.occasion);
+  const occasionLabel = occasion?.label;
 
-  const durationOptions = [
-    { key: "perDay" as const, label: "1 day", price: product.rentalPrice.perDay },
-    { key: "per3Days" as const, label: "3 days", price: product.rentalPrice.per3Days },
-    { key: "perWeek" as const, label: "7 days", price: product.rentalPrice.perWeek },
-  ];
-
-  const savings = Math.round(
-    ((product.retailPrice - product.rentalPrice[selectedDuration]) / product.retailPrice) * 100
-  );
-
-  const handleAdd = () => {
-    if (!selectedSize) return;
-
-    // Check if user is logged in
-    const token = getAuthToken();
-    if (!token) {
-      // Not logged in — show auth modal
-      setShowAuthModal(true);
-      return;
-    }
-
-    performAddToCart();
+  const validate = () => {
+    const next: Errors = {};
+    if (!size) next.size = "Choose a size.";
+    if (!startDate) next.date = "Pick the first day you need it.";
+    else if (dateBounds && (startDate < dateBounds.min || startDate > dateBounds.max))
+      next.date = `Choose a date between ${shortDate(fromISODate(dateBounds.min))} and ${shortDate(fromISODate(dateBounds.max))}.`;
+    setErrors(next);
+    return Object.keys(next).length === 0;
   };
 
-  const handleLoginSuccess = () => {
-    setShowAuthModal(false);
-    // After successful login, automatically add the item to cart
-    performAddToCart();
-  };
-
-  const handleDelete = () => {
-    if (confirm("Are you sure you want to delete this product?")) {
-      deleteProduct(product.id);
-      router.push("/shop");
-    }
-  };
-
-  const handleSaveEdit = (e: React.FormEvent) => {
+  const handleAdd = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    updateProduct(product.id, {
-      name: editName,
-      brand: editBrand,
-      description: editDescription,
-      retailPrice: Number(editRetailPrice),
-      rentalPrice: {
-        perDay: Number(editPerDay),
-        per3Days: Number(editPer3Days),
-        perWeek: Number(editPerWeek),
-      },
-    });
-    setIsEditing(false);
+    if (!validate()) return focusFirstError(e.currentTarget);
+    if (!getAuthToken()) return setShowAuthModal(true);
+    performAddToCart();
+  };
+
+  const toggleFavourite = () => {
+    if (!getAuthToken()) return router.push(`/auth?redirect=/shop/${product.id}`);
+    if (isFavourited) removeFromFavourites(product.id);
+    else addToFavourites(product.id);
   };
 
   return (
-    <div className="min-h-screen pt-20 pb-16">
-      <div className="max-w-7xl mx-auto px-6 md:px-10 py-8">
-        {/* Breadcrumb */}
-        <div className="flex justify-between items-center mb-8">
-          <Link
-            href="/shop"
-            className="inline-flex items-center gap-2 text-sm text-parchment/50 hover:text-parchment transition-colors"
-          >
-            <ArrowLeft size={14} />
-            Back to shop
-          </Link>
+    <div className="pt-20 pb-8">
+      <div className="max-w-7xl mx-auto px-6 md:px-10 pt-6">
+        <div className="flex items-center justify-between gap-4">
+          <nav aria-label="Breadcrumb" className="text-sm text-ink/60">
+            <ol className="flex flex-wrap items-center gap-x-2">
+              <li>
+                <Link href="/shop" className="hover:text-ink hover:underline underline-offset-4">
+                  Shop
+                </Link>
+              </li>
+              <li aria-hidden>/</li>
+              <li>
+                <Link href={`/shop?category=${product.category}`} className="hover:text-ink hover:underline underline-offset-4">
+                  {categoryLabel}
+                </Link>
+              </li>
+              <li aria-hidden className="hidden sm:block">
+                /
+              </li>
+              <li aria-current="page" className="hidden sm:block text-ink/80">
+                {product.name}
+              </li>
+            </ol>
+          </nav>
 
-          {/* Admin Controls */}
           {isAdmin && (
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsEditing(true)}
-                className="flex items-center gap-1.5 border-parchment/10 text-rose hover:bg-rose/10 font-semibold"
-              >
-                <Edit size={14} />
+              <Button variant="secondary" size="sm" onClick={() => setIsEditing(true)}>
                 Edit
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDelete}
-                className="flex items-center gap-1.5 border-red-500/20 text-red-400 hover:bg-red-500/10 font-semibold"
-              >
-                <Trash2 size={14} />
-                Delete
+              <Button variant="danger" size="sm" onClick={() => setConfirmDelete(true)}>
+                Remove
               </Button>
             </div>
           )}
         </div>
 
-        <div className="grid md:grid-cols-2 gap-12 lg:gap-20">
-          {/* Image */}
-          <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-charcoal-light border border-parchment/10">
-            <Image
-              src={product.images[0].startsWith("/") || product.images[0].startsWith("http") ? product.images[0] : "/images/placeholder.jpg"}
-              alt={product.name}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 50vw"
-              priority
-            />
-            <button
-              onClick={() => isFavourited ? removeFromFavourites(productId) : addToFavourites(productId)}
-              className="absolute top-5 right-5 p-3 bg-charcoal/60 backdrop-blur-sm rounded-full hover:bg-charcoal/80 transition-colors"
-              aria-label={isFavourited ? "Remove from favourites" : "Add to favourites"}
-            >
-              <Heart
-                size={18}
-                className={isFavourited ? "fill-rose text-[#c9a898]" : "text-parchment/60"}
+        <div className="mt-6 grid md:grid-cols-12 gap-10 lg:gap-16">
+          <div className="md:col-span-7">
+            <div className="relative aspect-[4/5] bg-white rounded-sm overflow-hidden md:sticky md:top-24">
+              <Image
+                src={product.images[0]}
+                alt={product.name}
+                fill
+                className="object-contain p-6 md:p-10"
+                sizes="(max-width: 768px) 100vw, 58vw"
+                priority
               />
-            </button>
+            </div>
           </div>
 
-          {/* Details */}
-          <div className="flex flex-col gap-6">
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs uppercase tracking-widest text-[#c9a898] font-bold">
-                  {product.brand}
-                </span>
-                <div className="flex items-center gap-1.5 text-sm text-parchment/50">
-                  <Star size={12} className="fill-rose text-[#c9a898]" />
-                  <span>{product.rating}</span>
-                  <span className="text-parchment/30">({product.reviewCount} reviews)</span>
-                </div>
-              </div>
-              <h1 className="font-display text-3xl md:text-4xl font-bold text-parchment">
-                {product.name}
-              </h1>
+          <div className="md:col-span-5">
+            <p className="text-sm text-ink/70">{product.brand}</p>
+            <div className="mt-1 flex items-start justify-between gap-4">
+              <h1 className="font-display text-3xl md:text-[2.5rem] leading-tight text-ink">{product.name}</h1>
+              <button
+                type="button"
+                onClick={toggleFavourite}
+                aria-pressed={isFavourited}
+                className="mt-2 inline-flex shrink-0 items-center gap-1.5 rounded-sm px-2 py-1 text-sm text-ink/75 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+              >
+                <Heart size={16} className={isFavourited ? "fill-rose-ink text-rose-ink" : ""} aria-hidden />
+                {isFavourited ? "Saved" : "Save"}
+              </button>
             </div>
+            <p className="mt-2 flex items-center gap-1.5 text-sm text-ink/70">
+              <Star size={13} className="fill-rose text-rose-ink" aria-hidden />
+              <span>
+                {product.rating.toFixed(1)}
+                <span className="sr-only"> out of 5,</span>
+              </span>
+              <span aria-hidden>·</span>
+              <span>from {product.reviewCount} rentals</span>
+            </p>
 
-            <p className="text-parchment/55 leading-relaxed">{product.description}</p>
-
-            {/* Savings badge */}
-            <div className="inline-flex items-center gap-2 bg-sage/10 border border-sage/20 rounded-lg px-4 py-2 text-sm text-sage w-fit font-medium">
-              <Shield size={14} />
-              Save {savings}% vs buying retail ({formatPrice(product.retailPrice)})
-            </div>
-
-            {/* Rental duration */}
-            <div>
-              <p className="text-xs uppercase tracking-wider text-parchment/40 mb-3 font-semibold">
-                Rental Duration
+            <div className="mt-6 border-t border-ink/15 pt-6">
+              <p className="font-display text-3xl text-ink tabular-nums">
+                {formatPrice(price)}
+                <span className="ml-2 font-body text-base text-ink/70">for {days === 1 ? "1 day" : `${days} days`}</span>
               </p>
-              <div className="grid grid-cols-3 gap-2">
-                {durationOptions.map(({ key, label, price }) => (
-                  <button
-                    key={key}
-                    onClick={() => setSelectedDuration(key)}
-                    className={`p-3 rounded-xl border text-center transition-colors ${
-                      selectedDuration === key
-                        ? "border-rose bg-rose/10"
-                        : "border-parchment/10 hover:border-parchment/30"
-                    }`}
-                  >
-                    <p className="text-sm font-semibold text-parchment">
-                      {formatPrice(price)}
-                    </p>
-                    <p className="text-xs text-parchment/40 mt-0.5">{label}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Size selector */}
-            <div>
-              <p className="text-xs uppercase tracking-wider text-parchment/40 mb-3 font-semibold">
-                Select Size
+              <p className="mt-1 text-sm text-ink/60 tabular-nums">
+                {days > 1 && <>{formatPrice(Math.round(price / days))} a day · </>}
+                {formatPrice(product.retailPrice)} to buy
               </p>
-              <div className="flex gap-2 flex-wrap">
-                {product.sizes.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`w-12 h-12 rounded-lg border text-sm font-medium transition-colors ${
-                      selectedSize === size
-                        ? "border-parchment bg-parchment text-charcoal font-bold"
-                        : "border-parchment/20 text-parchment/60 hover:border-parchment/50"
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
             </div>
 
-            {/* Add to cart */}
-            <div className="flex flex-col gap-3 pt-2">
-              {alreadyInCart ? (
-                <div className="flex gap-2 w-full">
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    className="flex-1 bg-charcoal-light border border-parchment/20 text-parchment hover:bg-charcoal"
-                    onClick={() => router.push("/cart")}
-                  >
-                    Already in Bag — Go to Cart
+            {product.available ? (
+              <form onSubmit={handleAdd} noValidate className="mt-6 flex flex-col gap-6">
+                <ChoiceGroup
+                  legend="How long?"
+                  name="duration"
+                  value={String(days)}
+                  onChange={(v) => setDays(Number(v) as Duration)}
+                  options={DURATIONS.map((d) => ({
+                    value: String(d.days),
+                    label: d.label,
+                    sub: formatPrice(priceFor(product, d.days)),
+                  }))}
+                />
+
+                <Field
+                  label="First day you need it"
+                  error={errors.date}
+                  hint="We deliver the day before and collect the day after your last day."
+                >
+                  {(p) => (
+                    <Input
+                      {...p}
+                      type="date"
+                      name="start"
+                      min={dateBounds?.min}
+                      max={dateBounds?.max}
+                      value={startDate}
+                      onChange={(e) => {
+                        setStartDate(e.target.value);
+                        setErrors((x) => ({ ...x, date: undefined }));
+                      }}
+                    />
+                  )}
+                </Field>
+
+                {schedule && (
+                  <dl className="-mt-2 grid grid-cols-3 gap-3 rounded-sm bg-paper-2 px-4 py-3 text-sm" aria-live="polite">
+                    <div>
+                      <dt className="text-ink/60">Arrives</dt>
+                      <dd className="text-ink">{shortDate(schedule.deliver)}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-ink/60">Wear until</dt>
+                      <dd className="text-ink">{shortDate(schedule.lastDay)}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-ink/60">We collect</dt>
+                      <dd className="text-ink">{shortDate(schedule.collect)}</dd>
+                    </div>
+                  </dl>
+                )}
+
+                <ChoiceGroup
+                  legend="Size"
+                  name="size"
+                  value={size}
+                  onChange={(v) => {
+                    setSize(v);
+                    setErrors((x) => ({ ...x, size: undefined }));
+                  }}
+                  error={errors.size}
+                  columns={5}
+                  action={
+                    <Link href="/sizing" className="text-ink/70 underline underline-offset-4 hover:text-ink">
+                      Size guide
+                    </Link>
+                  }
+                  options={ALL_SIZES.map((s) => ({ value: s, label: s, disabled: !product.sizes.includes(s) }))}
+                  hint={product.sizes.length < ALL_SIZES.length ? `Available in ${product.sizes.join(", ")}.` : undefined}
+                />
+
+                {inBag || justAdded ? (
+                  <div role="status" className="border-l-2 border-sage-ink bg-sage/10 px-4 py-3">
+                    <p className="text-sm text-ink">This piece is in your bag.</p>
+                    <div className="mt-3 flex flex-wrap gap-3">
+                      <Link href="/cart" className={buttonClass({ size: "sm" })}>
+                        View bag
+                      </Link>
+                      <Link href="/shop" className={buttonClass({ size: "sm", variant: "secondary" })}>
+                        Keep browsing
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  <Button type="submit" size="lg" className="w-full">
+                    Add to bag · {formatPrice(price)}
                   </Button>
-                </div>
-              ) : (
-                <Button
-                  variant="primary"
-                  size="lg"
-                  className="flex-1 bg-rose text-charcoal hover:bg-rose-dark font-bold py-3.5 rounded-xl transition-all"
-                  disabled={!product.available || !selectedSize}
-                  onClick={handleAdd}
-                >
-                  {!product.available
-                    ? "Currently Unavailable"
-                    : !selectedSize
-                    ? "Select a Size"
-                    : "Add to Bag"}
+                )}
+              </form>
+            ) : (
+              <div className="mt-6 border-l-2 border-ink/30 bg-paper-2 px-4 py-4">
+                <p className="text-ink">Booked out at the moment.</p>
+                <p className="mt-1 text-sm text-ink/70">Save it and it&apos;ll be waiting in your favourites when it&apos;s back.</p>
+                <Button variant="secondary" size="sm" className="mt-3" onClick={toggleFavourite}>
+                  {isFavourited ? "Saved to favourites" : "Save for later"}
                 </Button>
-              )}
+              </div>
+            )}
 
-              {addedSuccess && (
-                <p className="text-xs text-sage text-center font-medium animate-pulse">
-                  ✓ Successfully added to your bag!
-                </p>
-              )}
-            </div>
-
-            {/* Trust signals */}
-            <div className="pt-4 border-t border-parchment/10 grid grid-cols-3 gap-4 text-center">
-              {[
-                { icon: Package, text: "Free delivery & return" },
-                { icon: Shield, text: "Dry-cleaned before dispatch" },
-                { icon: Calendar, text: "Flexible rental dates" },
-              ].map(({ icon: Icon, text }) => (
-                <div key={text} className="flex flex-col items-center gap-2">
-                  <Icon size={16} className="text-parchment/30" />
-                  <p className="text-xs text-parchment/40 leading-tight">{text}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Tags */}
-            <div className="flex flex-wrap gap-2">
-              {product.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="text-xs px-2.5 py-1 bg-parchment/5 border border-parchment/10 rounded-full text-parchment/40 capitalize"
-                >
-                  {tag}
-                </span>
-              ))}
+            <div className="mt-10 border-t border-ink/15 pt-6">
+              <h2 className="font-display text-xl text-ink">About this piece</h2>
+              <p className="mt-3 text-ink/80 leading-relaxed">{product.description}</p>
+              <dl className="mt-6 divide-y divide-ink/10 border-y border-ink/10 text-sm">
+                {[
+                  ["Label", product.brand],
+                  ["Best for", occasionLabel],
+                  ["Sizes", product.sizes.join(", ")],
+                  ["Cleaning", "Professionally cleaned after every rental. Please don't wash it."],
+                  ["Delivery", "Free both ways, in a reusable garment bag"],
+                ].map(([k, v]) => (
+                  <div key={k} className="grid grid-cols-[7rem_1fr] gap-4 py-3">
+                    <dt className="text-ink/60">{k}</dt>
+                    <dd className="text-ink/90">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="mt-4 text-sm text-ink/70">
+                Doesn&apos;t fit when it arrives? Tell us within 2 hours for a replacement or full credit.{" "}
+                <Link href="/sizing" className="underline underline-offset-4 hover:text-ink">
+                  Fit Guarantee
+                </Link>
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Edit Product Modal */}
-      {isEditing && (
-        <div className="fixed inset-0 bg-charcoal/80 backdrop-blur-md z-999 flex items-center justify-center p-6">
-          <div className="bg-charcoal-light border border-parchment/10 rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 relative">
-            <button
-              onClick={() => setIsEditing(false)}
-              className="absolute top-4 right-4 text-parchment/40 hover:text-parchment"
-            >
-              <X size={20} />
-            </button>
-            <h2 className="font-display text-xl font-bold text-parchment mb-6">
-              Edit Product Details
-            </h2>
-
-            <form onSubmit={handleSaveEdit} className="space-y-4">
-              <div>
-                <label className="text-xs text-parchment/50 block mb-1">Product Name</label>
-                <input
-                  type="text"
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  className="w-full bg-charcoal border border-parchment/10 rounded-lg px-4 py-2.5 text-sm text-parchment focus:border-rose outline-none"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="text-xs text-parchment/50 block mb-1">Brand</label>
-                <input
-                  type="text"
-                  value={editBrand}
-                  onChange={(e) => setEditBrand(e.target.value)}
-                  className="w-full bg-charcoal border border-parchment/10 rounded-lg px-4 py-2.5 text-sm text-parchment focus:border-rose outline-none"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="text-xs text-parchment/50 block mb-1">Description</label>
-                <textarea
-                  value={editDescription}
-                  onChange={(e) => setEditDescription(e.target.value)}
-                  rows={3}
-                  className="w-full bg-charcoal border border-parchment/10 rounded-lg px-4 py-2.5 text-sm text-parchment focus:border-rose outline-none resize-none"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs text-parchment/50 block mb-1">Retail Price (₹)</label>
-                  <input
-                    type="number"
-                    value={editRetailPrice}
-                    onChange={(e) => setEditRetailPrice(Number(e.target.value))}
-                    className="w-full bg-charcoal border border-parchment/10 rounded-lg px-4 py-2.5 text-sm text-parchment focus:border-rose outline-none"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-parchment/50 block mb-1">1-Day Rental (₹)</label>
-                  <input
-                    type="number"
-                    value={editPerDay}
-                    onChange={(e) => setEditPerDay(Number(e.target.value))}
-                    className="w-full bg-charcoal border border-parchment/10 rounded-lg px-4 py-2.5 text-sm text-parchment focus:border-rose outline-none"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs text-parchment/50 block mb-1">3-Day Rental (₹)</label>
-                  <input
-                    type="number"
-                    value={editPer3Days}
-                    onChange={(e) => setEditPer3Days(Number(e.target.value))}
-                    className="w-full bg-charcoal border border-parchment/10 rounded-lg px-4 py-2.5 text-sm text-parchment focus:border-rose outline-none"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-parchment/50 block mb-1">7-Day Rental (₹)</label>
-                  <input
-                    type="number"
-                    value={editPerWeek}
-                    onChange={(e) => setEditPerWeek(Number(e.target.value))}
-                    className="w-full bg-charcoal border border-parchment/10 rounded-lg px-4 py-2.5 text-sm text-parchment focus:border-rose outline-none"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-4 border-t border-parchment/5">
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={() => setIsEditing(false)}
-                  className="flex-1 border-parchment/10 hover:bg-parchment/5"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="primary"
-                  type="submit"
-                  className="flex-1 bg-rose text-charcoal hover:bg-rose-dark font-bold"
-                >
-                  Save Changes
-                </Button>
-              </div>
-            </form>
+      {related.length > 0 && (
+        <section className="max-w-7xl mx-auto px-6 md:px-10 mt-20 md:mt-28 border-t border-ink/15 pt-12">
+          <h2 className="font-display text-2xl md:text-3xl text-ink">More for {occasion?.forPhrase}</h2>
+          <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-10 md:gap-x-6">
+            {related.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
           </div>
-        </div>
+        </section>
       )}
 
-      {/* Auth Prompt Modal — shown when unauthenticated user tries to add to cart */}
+      <Dialog open={isEditing} onClose={() => setIsEditing(false)} title="Edit piece" size="lg">
+        <ProductForm
+          initial={product}
+          submitLabel="Save changes"
+          onCancel={() => setIsEditing(false)}
+          onSubmit={(values) => {
+            updateProduct(product.id, values);
+            setIsEditing(false);
+          }}
+        />
+      </Dialog>
+
+      <Dialog
+        open={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        title={`Remove “${product.name}”?`}
+        description="It disappears from the collection straight away. Existing bookings aren't cancelled."
+      >
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+          <Button variant="secondary" onClick={() => setConfirmDelete(false)}>
+            Keep it
+          </Button>
+          <Button
+            variant="danger"
+            onClick={() => {
+              deleteProduct(product.id);
+              router.push("/shop");
+            }}
+          >
+            Remove piece
+          </Button>
+        </div>
+      </Dialog>
+
       <AuthPromptModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        onLoginSuccess={handleLoginSuccess}
+        onLoginSuccess={performAddToCart}
         redirectPath={`/shop/${product.id}`}
       />
     </div>

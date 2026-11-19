@@ -1,31 +1,13 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 import ContactPageContent from "./ContactPageContent";
 
-export const metadata: Metadata = {
-  title: "Contact WearLoop",
+export const metadata: Metadata = pageMetadata({
+  title: "Contact us",
   description:
-    "Get in touch with the WearLoop team — order support, sizing help, partnerships, and press enquiries. We typically respond within a few hours.",
-  keywords: [
-    "contact WearLoop",
-    "WearLoop support",
-    "fashion rental customer service",
-  ],
-  alternates: {
-    canonical: "https://www.wearloop.in/contact",
-  },
-  openGraph: {
-    title: "Contact WearLoop",
-    description:
-      "Get in touch with the WearLoop team — order support, sizing help, partnerships, and press enquiries.",
-    url: "https://www.wearloop.in/contact",
-    type: "website",
-  },
-  twitter: {
-    title: "Contact WearLoop",
-    description:
-      "Get in touch with the WearLoop team — order support, sizing help, partnerships, and press enquiries.",
-  },
-};
+    "Questions about an order, sizing or a partnership? Email or call us, Monday to Saturday. We reply within 24 hours.",
+  path: "/contact",
+});
 
 export default function ContactPage() {
   return <ContactPageContent />;

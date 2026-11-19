@@ -1,580 +1,410 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Plus, X } from "lucide-react";
 import ProductCard from "@/components/ui/ProductCard";
+import Button, { buttonClass } from "@/components/ui/Button";
+import Dialog from "@/components/ui/Dialog";
+import ProductForm from "@/components/admin/ProductForm";
+import { Input, Select } from "@/components/ui/Field";
 import { categories, occasions } from "@/lib/mockData";
-import { FilterState, Product } from "@/types";
-import { SlidersHorizontal, X, Plus, ChevronDown } from "lucide-react";
 import { useAppStore } from "@/context/AppContext";
-import { getAuthUser } from "@/lib/utils";
-import Button from "@/components/ui/Button";
+import { cn, getAuthUser } from "@/lib/utils";
+import { POPULAR_SEARCHES, searchProducts } from "@/lib/search";
+import type { FilterState } from "@/types";
 
-const defaultFilters: FilterState = {
-  category: "all",
-  occasion: "all",
-  size: "all",
-  minPrice: 0,
-  maxPrice: 2000,
-  sort: "popular",
-};
+const SIZES = ["XS", "S", "M", "L", "XL"];
 
-const sizes = ["all", "XS", "S", "M", "L", "XL"];
-
-const sortOptions = [
-  { value: "popular", label: "Most Popular" },
-  { value: "price-asc", label: "Price: Low to High" },
-  { value: "price-desc", label: "Price: High to Low" },
-  { value: "newest", label: "Newest" },
+const SORT_OPTIONS: { value: FilterState["sort"]; label: string }[] = [
+  { value: "popular", label: "Most booked" },
+  { value: "price-asc", label: "Price, low to high" },
+  { value: "price-desc", label: "Price, high to low" },
+  { value: "newest", label: "Newest first" },
 ];
 
+type Params = { category: string; occasion: string; size: string; sort: FilterState["sort"]; q: string };
+
+function readParams(sp: URLSearchParams): Params {
+  const sort = sp.get("sort") as FilterState["sort"] | null;
+  return {
+    category: sp.get("category") || "all",
+    occasion: sp.get("occasion") || "all",
+    size: sp.get("size") || "all",
+    sort: sort && SORT_OPTIONS.some((o) => o.value === sort) ? sort : "popular",
+    q: sp.get("q") || "",
+  };
+}
+
+/** Builds /shop?… with defaults left out, so URLs stay short and shareable. */
+function shopHref(current: Params, change: Partial<Params>) {
+  const next = { ...current, ...change };
+  const sp = new URLSearchParams();
+  if (next.q.trim()) sp.set("q", next.q.trim());
+  if (next.category !== "all") sp.set("category", next.category);
+  if (next.occasion !== "all") sp.set("occasion", next.occasion);
+  if (next.size !== "all") sp.set("size", next.size);
+  if (next.sort !== "popular") sp.set("sort", next.sort);
+  const qs = sp.toString();
+  return qs ? `/shop?${qs}` : "/shop";
+}
+
 export default function ShopPageContent() {
+  return (
+    <Suspense fallback={<div className="min-h-screen pt-16" />}>
+      <Shop />
+    </Suspense>
+  );
+}
+
+function Shop() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const params = readParams(searchParams);
   const { products, addProduct } = useAppStore();
-  const [filters, setFilters] = useState<FilterState>(defaultFilters);
-  const [showFilters, setShowFilters] = useState(false);
+
+  const [showFilters, setShowFilters] = useState(params.occasion !== "all" || params.size !== "all");
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
-  const [isSortOpen, setIsSortOpen] = useState(false);
-  const sortRef = useRef<HTMLDivElement>(null);
+  const [query, setQuery] = useState(params.q);
+  const searchRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => setIsAdmin(getAuthUser()?.role === "admin"), []);
+
+  // Keep the box in sync when the URL changes (back button, removing a chip).
+  useEffect(() => setQuery((typed) => (typed.trim() === params.q ? typed : params.q)), [params.q]);
+
+  // The navbar search icon links here with ?focus=search.
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
-        setIsSortOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    if (searchParams.get("focus") === "search") {
+      searchRef.current?.focus();
+      router.replace(shopHref(params, {}), { scroll: false });
+    }
+    // Only on first load.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // New product form states
-  const [name, setName] = useState("");
-  const [brand, setBrand] = useState("");
-  const [category, setCategory] = useState<Product["category"]>("dress");
-  const [occasion, setOccasion] = useState<Product["occasion"]>("party");
-  const [description, setDescription] = useState("");
-  const [imagePath, setImagePath] = useState("");
-  const [retailPrice, setRetailPrice] = useState(0);
-  const [price1Day, setPrice1Day] = useState(0);
-  const [price3Day, setPrice3Day] = useState(0);
-  const [price7Day, setPrice7Day] = useState(0);
-  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
-  const [tagsInput, setTagsInput] = useState("");
+  const go = (change: Partial<Params>) => router.replace(shopHref(params, change), { scroll: false });
 
-  useEffect(() => {
-    const user = getAuthUser();
-    if (user?.role === "admin") {
-      setIsAdmin(true);
-    }
-  }, []);
+  const search = useMemo(() => (params.q ? searchProducts(products, params.q) : null), [products, params.q]);
 
-  const filtered = useMemo<Product[]>(() => {
-    let result = [...products];
-
-    if (filters.category !== "all") {
-      result = result.filter((p) => p.category === filters.category);
-    }
-    if (filters.occasion !== "all") {
-      result = result.filter((p) => p.occasion === filters.occasion);
-    }
-    if (filters.size !== "all") {
-      result = result.filter((p) => p.sizes.includes(filters.size));
-    }
-    result = result.filter(
+  const filtered = useMemo(() => {
+    const pool = search ? search.results : products;
+    let result = pool.filter(
       (p) =>
-        p.rentalPrice.perDay >= filters.minPrice &&
-        p.rentalPrice.perDay <= filters.maxPrice,
+        (params.category === "all" || p.category === params.category) &&
+        (params.occasion === "all" || p.occasion === params.occasion) &&
+        (params.size === "all" || p.sizes.includes(params.size)),
     );
-
-    switch (filters.sort) {
+    switch (params.sort) {
       case "price-asc":
-        result.sort((a, b) => a.rentalPrice.perDay - b.rentalPrice.perDay);
+        result = [...result].sort((a, b) => a.rentalPrice.per3Days - b.rentalPrice.per3Days);
         break;
       case "price-desc":
-        result.sort((a, b) => b.rentalPrice.perDay - a.rentalPrice.perDay);
+        result = [...result].sort((a, b) => b.rentalPrice.per3Days - a.rentalPrice.per3Days);
         break;
       case "newest":
-        result.reverse();
+        result = [...result].sort((a, b) => Number(b.id) - Number(a.id));
         break;
       default:
-        result.sort((a, b) => b.reviewCount - a.reviewCount);
+        // With a search, keep the relevance order; otherwise most booked first.
+        if (!search) result = [...result].sort((a, b) => Number(b.available) - Number(a.available) || b.reviewCount - a.reviewCount);
     }
-
     return result;
-  }, [products, filters]);
+  }, [products, search, params.category, params.occasion, params.size, params.sort]);
 
-  const updateFilter = <K extends keyof FilterState>(
-    key: K,
-    value: FilterState[K],
-  ) => setFilters((prev) => ({ ...prev, [key]: value }));
+  const filtersActive = params.category !== "all" || params.occasion !== "all" || params.size !== "all";
+  const hiddenByFilters = Boolean(search && search.results.length > 0 && filtered.length === 0 && filtersActive);
+  const mostBooked = useMemo(
+    () => [...products].filter((p) => p.available).sort((a, b) => b.reviewCount - a.reviewCount).slice(0, 4),
+    [products],
+  );
 
-  const toggleSize = (sizeVal: string) => {
-    if (selectedSizes.includes(sizeVal)) {
-      setSelectedSizes(selectedSizes.filter((s) => s !== sizeVal));
-    } else {
-      setSelectedSizes([...selectedSizes, sizeVal]);
-    }
-  };
+  // Search as you type, without pushing a history entry per keystroke.
+  useEffect(() => {
+    if (query.trim() === params.q) return;
+    const id = setTimeout(() => go({ q: query }), 350);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
 
-  const handleAddProduct = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (selectedSizes.length === 0) {
-      alert("Please select at least one size.");
-      return;
-    }
+  const categoryLabel = params.category !== "all" ? categories.find((c) => c.id === params.category)?.label : undefined;
+  const occasion = params.occasion !== "all" ? occasions.find((o) => o.id === params.occasion) : undefined;
+  const occasionLabel = occasion?.label;
+  const heading = categoryLabel
+    ? occasion
+      ? `${categoryLabel} for ${occasion.forPhrase}`
+      : categoryLabel
+    : occasion?.heading ?? "The collection";
 
-    const tags = tagsInput
-      .split(",")
-      .map((t) => t.trim())
-      .filter((t) => t.length > 0);
+  const filterChips: { label: string; clear: Partial<Params> }[] = [
+    ...(occasionLabel ? [{ label: occasionLabel, clear: { occasion: "all" } }] : []),
+    ...(params.size !== "all" ? [{ label: `Size ${params.size}`, clear: { size: "all" } }] : []),
+  ];
+  const chips = [...(params.q ? [{ label: `“${params.q}”`, clear: { q: "" } }] : []), ...filterChips];
 
-    addProduct({
-      name,
-      brand,
-      category,
-      occasion,
-      description,
-      images: [imagePath || "/images/placeholder.jpg"],
-      rentalPrice: {
-        perDay: Number(price1Day),
-        per3Days: Number(price3Day),
-        perWeek: Number(price7Day),
-      },
-      retailPrice: Number(retailPrice),
-      sizes: selectedSizes,
-      tags,
-    });
-
-    // Reset fields
-    setName("");
-    setBrand("");
-    setCategory("dress");
-    setOccasion("party");
-    setDescription("");
-    setImagePath("");
-    setRetailPrice(0);
-    setPrice1Day(0);
-    setPrice3Day(0);
-    setPrice7Day(0);
-    setSelectedSizes([]);
-    setTagsInput("");
-    setIsAdding(false);
-  };
+  const pill = (on: boolean) =>
+    cn(
+      "inline-flex h-9 shrink-0 items-center rounded-sm border px-3.5 text-sm transition-colors",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-paper",
+      on ? "border-ink bg-ink text-paper" : "border-ink/25 text-ink hover:border-ink/60",
+    );
 
   return (
     <div className="min-h-screen pt-16">
-      {/* Header bar */}
-      <div className="border-b border-parchment/10 bg-charcoal/80 sticky top-16 z-30 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-6 md:px-10 py-4 flex items-center justify-between gap-4">
-          {/* Category tabs */}
-          <div className="flex gap-1 overflow-x-auto scrollbar-none">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => updateFilter("category", cat.id)}
-                className={`shrink-0 px-4 py-2 rounded-full text-xs font-medium transition-colors ${
-                  filters.category === cat.id
-                    ? "bg-rose text-charcoal"
-                    : "text-parchment/60 hover:text-parchment hover:bg-parchment/5"
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
+      <div className="max-w-7xl mx-auto px-6 md:px-10 pt-10">
+        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h1 className="font-display text-3xl md:text-4xl text-ink">{heading}</h1>
+            <p className="mt-1 text-sm text-ink/60 tabular-nums" aria-live="polite">
+              {filtered.length} {filtered.length === 1 ? "piece" : "pieces"}
+            </p>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
-            {isAdmin && (
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => setIsAdding(true)}
-                className="flex items-center gap-1.5 bg-rose text-charcoal hover:bg-rose-dark font-bold text-xs"
+          <form
+            role="search"
+            className="w-full md:w-80"
+            onSubmit={(e) => {
+              e.preventDefault();
+              go({ q: query });
+            }}
+          >
+            <label htmlFor="shop-search" className="sr-only">
+              Search the collection
+            </label>
+            <Input
+              ref={searchRef}
+              id="shop-search"
+              type="search"
+              name="q"
+              placeholder="Search: satin, bandhgala, navy…"
+              value={query}
+              autoComplete="off"
+              enterKeyHint="search"
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </form>
+        </div>
+
+        <div className="mt-8 flex flex-col gap-4 border-y border-ink/15 py-4 lg:flex-row lg:items-center lg:justify-between">
+          <nav aria-label="Categories" className="-mx-1 flex gap-2 overflow-x-auto px-1 py-1">
+            {categories.map((c) => (
+              <Link
+                key={c.id}
+                href={shopHref(params, { category: c.id })}
+                scroll={false}
+                aria-current={params.category === c.id ? "page" : undefined}
+                className={pill(params.category === c.id)}
               >
-                <Plus size={14} />
-                Add Piece
+                {c.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setShowFilters((v) => !v)}
+              aria-expanded={showFilters}
+              aria-controls="shop-filters"
+              className={pill(false)}
+            >
+              {showFilters ? "Hide filters" : "Filters"}
+              {filterChips.length > 0 && <span className="ml-1.5 text-ink/60">({filterChips.length})</span>}
+            </button>
+            <label className="flex items-center gap-2 text-sm text-ink/70">
+              <span className="hidden sm:inline">Sort</span>
+              <Select
+                value={params.sort}
+                onChange={(e) => go({ sort: e.target.value as FilterState["sort"] })}
+                controlSize="sm"
+                className="min-w-[11.5rem]"
+              >
+                {SORT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </Select>
+            </label>
+            {isAdmin && (
+              <Button size="sm" onClick={() => setIsAdding(true)}>
+                <Plus size={14} aria-hidden />
+                Add a piece
               </Button>
             )}
-
-            <div className="relative" ref={sortRef}>
-              <button
-                onClick={() => {
-                  setIsSortOpen(!isSortOpen);
-                  console.log("55555");
-                }}
-                className="flex items-center justify-between min-w-[140px] text-xs bg-parchment/5 border border-parchment/10 text-parchment/70 rounded px-3 py-2 hover:border-rose/50 focus:border-rose/50 focus:outline-none transition-colors"
-              >
-                <span>
-                  {sortOptions.find((opt) => opt.value === filters.sort)
-                    ?.label || "Sort By"}
-                </span>
-                <ChevronDown
-                  size={14}
-                  className={`transition-transform duration-200 ${isSortOpen ? "rotate-180" : ""}`}
-                />
-              </button>
-
-              <AnimatePresence>
-                {isSortOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 5 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute inset-x-0 top-full mt-2 bg-charcoal-light border border-parchment/10 rounded-lg shadow-xl overflow-hidden z-50"
-                  >
-                    {sortOptions.map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => {
-                          updateFilter(
-                            "sort",
-                            option.value as FilterState["sort"],
-                          );
-                          setIsSortOpen(false);
-                        }}
-                        className={`w-full text-left px-4 py-2.5 text-xs transition-colors flex items-center justify-between ${
-                          filters.sort === option.value
-                            ? "bg-rose/10 text-rose"
-                            : "text-parchment/70 hover:bg-parchment/5 hover:text-parchment"
-                        }`}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-1.5 text-xs text-parchment/60 hover:text-parchment transition-colors border border-parchment/10 hover:border-parchment/30 rounded px-3 py-2"
-            >
-              <SlidersHorizontal size={12} />
-              Filters
-            </button>
           </div>
         </div>
 
-        {/* Expanded filters */}
         {showFilters && (
-          <div className="border-t border-parchment/10 bg-charcoal-light px-6 md:px-10 py-5">
-            <div className="max-w-7xl mx-auto flex flex-wrap gap-6">
-              {/* Occasion */}
-              <div>
-                <p className="text-xs text-parchment/40 uppercase tracking-wider mb-2">
-                  Occasion
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {occasions.map((occ) => (
-                    <button
-                      key={occ.id}
-                      onClick={() => updateFilter("occasion", occ.id)}
-                      className={`px-3 py-1.5 rounded text-xs transition-colors ${
-                        filters.occasion === occ.id
-                          ? "bg-sage/20 border border-sage/40 text-sage"
-                          : "border border-parchment/10 text-parchment/50 hover:border-parchment/30"
-                      }`}
-                    >
-                      {occ.label}
-                    </button>
-                  ))}
-                </div>
+          <div id="shop-filters" className="flex flex-col gap-6 border-b border-ink/15 py-5 md:flex-row md:gap-12">
+            <div>
+              <p className="mb-2 text-sm font-medium text-ink">Occasion</p>
+              <div className="flex flex-wrap gap-2">
+                {occasions.map((o) => (
+                  <Link
+                    key={o.id}
+                    href={shopHref(params, { occasion: o.id })}
+                    scroll={false}
+                    aria-current={params.occasion === o.id ? "true" : undefined}
+                    className={pill(params.occasion === o.id)}
+                  >
+                    {o.label}
+                  </Link>
+                ))}
               </div>
-
-              {/* Size */}
-              <div>
-                <p className="text-xs text-parchment/40 uppercase tracking-wider mb-2">
-                  Size
-                </p>
-                <div className="flex gap-1.5">
-                  {sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => updateFilter("size", size)}
-                      className={`w-10 h-8 rounded text-xs transition-colors ${
-                        filters.size === size
-                          ? "bg-parchment text-charcoal font-semibold"
-                          : "border border-parchment/10 text-parchment/50 hover:border-parchment/30"
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Reset */}
-              {JSON.stringify(filters) !== JSON.stringify(defaultFilters) && (
-                <button
-                  onClick={() => setFilters(defaultFilters)}
-                  className="flex items-center gap-1 text-xs text-[#c9a898] hover:text-[#c9a898]-dark transition-colors self-end mb-1"
-                >
-                  <X size={12} />
-                  Clear all
-                </button>
-              )}
             </div>
+            <div>
+              <p className="mb-2 text-sm font-medium text-ink">Size</p>
+              <div className="flex flex-wrap gap-2">
+                {["all", ...SIZES].map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => go({ size: s })}
+                    aria-pressed={params.size === s}
+                    className={cn(pill(params.size === s), "min-w-[2.75rem] justify-center")}
+                  >
+                    {s === "all" ? "Any" : s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {chips.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 pt-4">
+            {chips.map((chip) => (
+              <button
+                key={chip.label}
+                type="button"
+                onClick={() => go(chip.clear)}
+                className="inline-flex items-center gap-1.5 rounded-sm bg-paper-2 px-2.5 py-1 text-sm text-ink hover:bg-ink/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+                aria-label={`Remove filter ${chip.label}`}
+              >
+                {chip.label}
+                <X size={13} aria-hidden />
+              </button>
+            ))}
+            <Link
+              href={shopHref(params, { q: "", occasion: "all", size: "all" })}
+              scroll={false}
+              className="ml-1 text-sm text-ink/70 underline underline-offset-4 hover:text-ink"
+            >
+              Clear all
+            </Link>
           </div>
         )}
       </div>
 
-      {/* Product grid */}
       <div className="max-w-7xl mx-auto px-6 md:px-10 py-10">
-        <p className="text-xs text-parchment/40 mb-6 font-medium">
-          {filtered.length} piece{filtered.length !== 1 ? "s" : ""} found
-        </p>
+        {search && filtered.length > 0 && (search.correctedQuery || search.ignored.length > 0 || search.mode === "some") && (
+          <div className="mb-8 space-y-1 text-sm text-ink/75" role="status">
+            {search.correctedQuery && (
+              <p>
+                Showing results for <span className="text-ink">“{search.correctedQuery}”</span>.
+              </p>
+            )}
+            {search.ignored.length > 0 && (
+              <p>
+                We don&apos;t have anything called {search.ignored.map((w) => `“${w}”`).join(" or ")} yet, so we left it out.
+              </p>
+            )}
+            {search.mode === "some" && <p>Nothing matches every word, so these match some of them.</p>}
+          </div>
+        )}
 
         {filtered.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10 md:gap-x-6">
             {filtered.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
-        ) : (
-          <div className="text-center py-24">
-            <p className="font-display text-2xl text-parchment/30 mb-3 font-semibold">
-              Nothing here yet
+        ) : hiddenByFilters && search ? (
+          <div className="border-t border-ink/15 pt-10 pb-16">
+            <p className="font-display text-2xl text-ink">
+              {search.results.length} {search.results.length === 1 ? "piece matches" : "pieces match"} “{params.q}”, but not with
+              these filters
             </p>
-            <p className="text-sm text-parchment/20">
-              Try adjusting your filters
-            </p>
-            <button
-              onClick={() => setFilters(defaultFilters)}
-              className="mt-4 text-xs text-[#c9a898] hover:underline font-semibold"
+            <p className="mt-2 max-w-md text-ink/70">Remove a filter to see them.</p>
+            <Link
+              href={shopHref(params, { category: "all", occasion: "all", size: "all" })}
+              scroll={false}
+              className={buttonClass({ variant: "secondary", className: "mt-6" })}
             >
-              Reset filters
-            </button>
+              Show all {search.results.length} for “{params.q}”
+            </Link>
+          </div>
+        ) : (
+          <div className="border-t border-ink/15 pt-10 pb-6">
+            <p className="font-display text-2xl text-ink">
+              {params.q ? `Nothing matches “${params.q}”` : "Nothing matches those filters"}
+            </p>
+            <p className="mt-2 max-w-lg text-ink/70">
+              {params.q
+                ? search?.ignored.length
+                  ? `We don't stock anything called ${search.ignored.map((w) => `“${w}”`).join(" or ")} at the moment. Try a colour, a fabric or the event you're dressing for.`
+                  : "Try a colour, a fabric or the event you're dressing for."
+                : "Try another size or occasion, or clear the filters to see everything."}
+            </p>
+
+            {params.q && (
+              <div className="mt-6">
+                <p className="text-sm font-medium text-ink">People often search for</p>
+                <ul className="mt-3 flex flex-wrap gap-2">
+                  {POPULAR_SEARCHES.map((term) => (
+                    <li key={term}>
+                      <Link
+                        href={shopHref(params, { q: term.toLowerCase(), category: "all", occasion: "all", size: "all" })}
+                        scroll={false}
+                        className={pill(false)}
+                      >
+                        {term}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <p className="mt-6 text-sm">
+              <Link href="/shop" className="text-ink underline underline-offset-4">
+                Clear {params.q ? "the search" : "filters"} and show everything
+              </Link>
+            </p>
+
+            {mostBooked.length > 0 && (
+              <section className="mt-14">
+                <h2 className="font-display text-xl text-ink">Booked most this month</h2>
+                <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-10 md:gap-x-6">
+                  {mostBooked.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
         )}
       </div>
 
-      {/* Add Product Modal */}
-      {isAdding && (
-        <div className="fixed inset-0 bg-charcoal/80 backdrop-blur-md z-999 flex items-center justify-center p-6">
-          <div className="bg-charcoal-light border border-parchment/10 rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 relative">
-            <button
-              onClick={() => setIsAdding(false)}
-              className="absolute top-4 right-4 text-parchment/40 hover:text-parchment"
-            >
-              <X size={20} />
-            </button>
-            <h2 className="font-display text-xl font-bold text-parchment mb-6">
-              Add New Designer Piece
-            </h2>
-
-            <form onSubmit={handleAddProduct} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs text-parchment/50 block mb-1">
-                    Piece Name
-                  </label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Classic Trench Coat"
-                    className="w-full bg-charcoal border border-parchment/10 rounded-lg px-4 py-2.5 text-sm text-parchment focus:border-rose outline-none"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-parchment/50 block mb-1">
-                    Brand
-                  </label>
-                  <input
-                    type="text"
-                    value={brand}
-                    onChange={(e) => setBrand(e.target.value)}
-                    placeholder="e.g. Burberry"
-                    className="w-full bg-charcoal border border-parchment/10 rounded-lg px-4 py-2.5 text-sm text-parchment focus:border-rose outline-none"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs text-parchment/50 block mb-1">
-                    Category
-                  </label>
-                  <select
-                    value={category}
-                    onChange={(e) =>
-                      setCategory(e.target.value as Product["category"])
-                    }
-                    className="w-full bg-charcoal border border-parchment/10 rounded-lg px-4 py-2.5 text-sm text-parchment focus:border-rose outline-none"
-                  >
-                    <option value="dress">Dresses</option>
-                    <option value="outerwear">Outerwear</option>
-                    <option value="suit">Suits</option>
-                    <option value="bottom">Bottoms</option>
-                    <option value="top">Tops</option>
-                    <option value="accessory">Accessories</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs text-parchment/50 block mb-1">
-                    Occasion
-                  </label>
-                  <select
-                    value={occasion}
-                    onChange={(e) =>
-                      setOccasion(e.target.value as Product["occasion"])
-                    }
-                    className="w-full bg-charcoal border border-parchment/10 rounded-lg px-4 py-2.5 text-sm text-parchment focus:border-rose outline-none"
-                  >
-                    <option value="casual">Casual</option>
-                    <option value="work">Work</option>
-                    <option value="party">Party</option>
-                    <option value="formal">Formal</option>
-                    <option value="wedding">Wedding</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs text-parchment/50 block mb-1">
-                  Description
-                </label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={2}
-                  placeholder="Describe the fabric, design details, fit..."
-                  className="w-full bg-charcoal border border-parchment/10 rounded-lg px-4 py-2.5 text-sm text-parchment focus:border-rose outline-none resize-none"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs text-parchment/50 block mb-1">
-                    Image Path / URL
-                  </label>
-                  <input
-                    type="text"
-                    value={imagePath}
-                    onChange={(e) => setImagePath(e.target.value)}
-                    placeholder="e.g. /images/men-coats/mc_1.jpg"
-                    className="w-full bg-charcoal border border-parchment/10 rounded-lg px-4 py-2.5 text-sm text-parchment focus:border-rose outline-none"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-parchment/50 block mb-1">
-                    Retail Price (₹)
-                  </label>
-                  <input
-                    type="number"
-                    value={retailPrice || ""}
-                    onChange={(e) => setRetailPrice(Number(e.target.value))}
-                    placeholder="45000"
-                    className="w-full bg-charcoal border border-parchment/10 rounded-lg px-4 py-2.5 text-sm text-parchment focus:border-rose outline-none"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="text-[10px] uppercase text-parchment/50 block mb-1">
-                    1-Day Rental (₹)
-                  </label>
-                  <input
-                    type="number"
-                    value={price1Day || ""}
-                    onChange={(e) => setPrice1Day(Number(e.target.value))}
-                    placeholder="699"
-                    className="w-full bg-charcoal border border-parchment/10 rounded-lg px-3 py-2 text-sm text-parchment focus:border-rose outline-none"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] uppercase text-parchment/50 block mb-1">
-                    3-Day Rental (₹)
-                  </label>
-                  <input
-                    type="number"
-                    value={price3Day || ""}
-                    onChange={(e) => setPrice3Day(Number(e.target.value))}
-                    placeholder="1699"
-                    className="w-full bg-charcoal border border-parchment/10 rounded-lg px-3 py-2 text-sm text-parchment focus:border-rose outline-none"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] uppercase text-parchment/50 block mb-1">
-                    7-Day Rental (₹)
-                  </label>
-                  <input
-                    type="number"
-                    value={price7Day || ""}
-                    onChange={(e) => setPrice7Day(Number(e.target.value))}
-                    placeholder="2999"
-                    className="w-full bg-charcoal border border-parchment/10 rounded-lg px-3 py-2 text-sm text-parchment focus:border-rose outline-none"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs text-parchment/50 block mb-2 font-medium">
-                  Select Sizes
-                </label>
-                <div className="flex gap-2">
-                  {["XS", "S", "M", "L", "XL"].map((sz) => (
-                    <button
-                      key={sz}
-                      type="button"
-                      onClick={() => toggleSize(sz)}
-                      className={`px-4 py-2 text-xs font-semibold rounded-lg border transition-colors ${
-                        selectedSizes.includes(sz)
-                          ? "border-parchment bg-parchment text-charcoal"
-                          : "border-parchment/10 hover:border-parchment/30 text-parchment/60"
-                      }`}
-                    >
-                      {sz}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs text-parchment/50 block mb-1">
-                  Tags (comma separated)
-                </label>
-                <input
-                  type="text"
-                  value={tagsInput}
-                  onChange={(e) => setTagsInput(e.target.value)}
-                  placeholder="e.g. wool, coat, formal, winter"
-                  className="w-full bg-charcoal border border-parchment/10 rounded-lg px-4 py-2.5 text-sm text-parchment focus:border-rose outline-none"
-                />
-              </div>
-
-              <div className="flex gap-3 pt-4 border-t border-parchment/5">
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={() => setIsAdding(false)}
-                  className="flex-1 border-parchment/10 hover:bg-parchment/5"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="primary"
-                  type="submit"
-                  className="flex-1 bg-rose text-charcoal hover:bg-rose-dark font-bold"
-                >
-                  Create Piece
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <Dialog
+        open={isAdding}
+        onClose={() => setIsAdding(false)}
+        title="Add a piece"
+        description="It appears in the collection as soon as you save."
+        size="lg"
+      >
+        <ProductForm
+          submitLabel="Add to collection"
+          onCancel={() => setIsAdding(false)}
+          onSubmit={(values) => {
+            addProduct(values);
+            setIsAdding(false);
+          }}
+        />
+      </Dialog>
     </div>
   );
 }

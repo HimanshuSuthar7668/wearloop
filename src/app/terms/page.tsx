@@ -1,32 +1,13 @@
-import Link from "next/link";
-import { ArrowRight, Mail } from "lucide-react";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
+import { PageHeader, LegalBody, PageFooterNote, ButtonLink } from "@/components/ui/Page";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Terms of Service",
   description:
-    "The terms governing your use of WearLoop's clothing rental service — rentals, payments, damage, cancellations, and your account responsibilities.",
-  keywords: [
-    "WearLoop terms of service",
-    "fashion rental terms",
-    "clothing rental agreement India",
-  ],
-  alternates: {
-    canonical: "https://www.wearloop.in/terms",
-  },
-  openGraph: {
-    title: "Terms of Service — WearLoop",
-    description:
-      "The terms governing your use of WearLoop's clothing rental service.",
-    url: "https://www.wearloop.in/terms",
-    type: "website",
-  },
-  twitter: {
-    title: "Terms of Service — WearLoop",
-    description:
-      "The terms governing your use of WearLoop's clothing rental service.",
-  },
-};
+    "The terms for renting from WearLoop: bookings, payment, late returns, damage, cancellations and your account.",
+  path: "/terms",
+});
 
 const sections = [
   {
@@ -103,83 +84,17 @@ const sections = [
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen pt-20">
-      {/* Hero */}
-      <section className="max-w-4xl mx-auto px-6 md:px-10 py-16 text-center">
-        <p className="text-xs uppercase tracking-[0.25em] text-[#c9a898] mb-4">
-          Legal
-        </p>
-        <h1 className="font-display text-5xl md:text-6xl font-bold text-parchment mb-5 text-balance">
-          Terms of Service
-        </h1>
-        <p className="text-parchment/40 text-sm">Last updated: 4 July 2026</p>
-      </section>
-
-      {/* Intro */}
-      <section className="max-w-3xl mx-auto px-6 md:px-10 pb-4">
-        <p className="text-parchment/50 leading-relaxed">
-          These Terms of Service (&quot;Terms&quot;) govern your access to and use of
-          WearLoop&apos;s website, mobile app, and clothing rental services.
-          Please read them carefully before placing an order.
-        </p>
-      </section>
-
-      {/* Sections */}
-      <section className="max-w-3xl mx-auto px-6 md:px-10 py-16">
-        <div className="flex flex-col divide-y divide-parchment/10">
-          {sections.map(({ title, body }) => (
-            <div key={title} className="py-8">
-              <h2 className="font-display text-xl font-semibold text-parchment mb-4">
-                {title}
-              </h2>
-              <div className="flex flex-col gap-3">
-                {body.map((paragraph, i) => (
-                  <p
-                    key={i}
-                    className="text-sm text-parchment/50 leading-relaxed"
-                  >
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Contact */}
-      <section className="bg-charcoal-light border-y border-parchment/10 py-16">
-        <div className="max-w-3xl mx-auto px-6 md:px-10 text-center">
-          <h2 className="font-display text-xl font-semibold text-parchment mb-3">
-            Questions about these Terms?
-          </h2>
-          <p className="text-sm text-parchment/50 leading-relaxed mb-5">
-            If anything here is unclear, our support team can walk you
-            through it before you place an order.
-          </p>
-          <a
-            href="mailto:legal@wearloop.in"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-parchment hover:text-[#c9a898] transition-colors"
-          >
-            <Mail size={14} />
-            legal@wearloop.in
-          </a>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="max-w-7xl mx-auto px-6 md:px-10 py-24 text-center">
-        <p className="font-display text-2xl font-semibold text-parchment mb-4">
-          Ready to rent with confidence?
-        </p>
-        <Link
-          href="/shop"
-          className="inline-flex items-center gap-2 bg-rose text-charcoal font-semibold text-sm px-8 py-4 rounded-lg hover:bg-rose-dark transition-colors group"
-        >
-          Browse the collection
-          <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-        </Link>
-      </section>
+    <div className="pt-20">
+      <PageHeader title="Terms of Service" meta="Last updated 4 July 2026" />
+      <LegalBody
+        intro={<>These Terms of Service (&quot;Terms&quot;) govern your access to and use of WearLoop&apos;s website, mobile app, and clothing rental services. Please read them carefully before placing an order.</>}
+        sections={sections}
+      />
+      <PageFooterNote
+        title="Something unclear?"
+        body="Ask before you order and we'll explain it."
+        action={<ButtonLink href="mailto:legal@wearloop.in">legal@wearloop.in</ButtonLink>}
+      />
     </div>
   );
 }

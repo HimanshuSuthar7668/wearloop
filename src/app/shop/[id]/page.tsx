@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
-import { productsApi } from "@/lib/api";
+import { notFound } from "next/navigation";
+import { getProduct } from "@/lib/catalog";
+import { categories } from "@/lib/mockData";
+import { absoluteUrl, SITE_NAME } from "@/lib/site";
 import ProductDetailContent from "./ProductDetailContent";
 
 interface PageProps {
@@ -7,54 +10,100 @@ interface PageProps {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  try {
-    const product = await productsApi.getById(params.id);
-    if (!product) throw new Error("not found");
-    return {
-      title: `${product.name} — ${product.brand}`,
-      description: product.description,
-      keywords: [
-        product.name,
-        product.brand,
-        "rent designer clothes",
-        "fashion rental India",
-        "WearLoop",
-      ],
-      alternates: {
-        canonical: `https://www.wearloop.in/shop/${params.id}`,
-      },
-      openGraph: {
-        title: `${product.name} — ${product.brand} | WearLoop`,
-        description: product.description,
-        url: `https://www.wearloop.in/shop/${params.id}`,
-        type: "website",
-        images: product.images?.[0]
-          ? [
-              {
-                url: product.images[0],
-                width: 1200,
-                height: 630,
-                alt: `${product.name} by ${product.brand}`,
-              },
-            ]
-          : undefined,
-      },
-      twitter: {
-        card: "summary_large_image",
-        title: `${product.name} — ${product.brand} | WearLoop`,
-        description: product.description,
-        images: product.images?.[0] ? [product.images[0]] : undefined,
-      },
-    };
-  } catch {
-    return {
-      title: "Shop Designer Fashion Rentals",
-      description: "Rent designer fashion pieces from WearLoop.",
-      robots: { index: false, follow: false },
-    };
-  }
+  const product = await getProduct(params.id);
+  if (!product) return { title: "Piece not found", robots: { index: false } };
+
+  const title = `Rent the ${product.name} by ${product.brand}`;
+  const description = `${product.description} From ${new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(product.rentalPrice.perDay)} a day, delivered free.`;
+  const url = absoluteUrl(`/shop/${product.id}`);
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title: `${title} | ${SITE_NAME}`,
+      description,
+      url,
+      type: "website",
+      images: [{ url: absoluteUrl(product.images[0]), alt: `${product.name} by ${product.brand}` }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | ${SITE_NAME}`,
+      description,
+      images: [absoluteUrl(product.images[0])],
+    },
+  };
 }
 
-export default function ProductDetailPage({ params }: PageProps) {
-  return <ProductDetailContent productId={params.id} />;
+export default async function ProductDetailPage({ params }: PageProps) {
+  const product = await getProduct(params.id);
+  if (!product) notFound();
+
+  const url = absoluteUrl(`/shop/${product.id}`);
+  const category = categories.find((c) => c.id === product.category);
+
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: product.name,
+      description: product.description,
+      image: [absoluteUrl(product.images[0])],
+      sku: `WL-${product.id}`,
+      brand: { "@type": "Brand", name: product.brand },
+      category: category?.label,
+      ...(product.reviewCount > 0 && {
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: product.rating,
+          reviewCount: product.reviewCount,
+          bestRating: 5,
+        },
+      }),
+      offers: {
+        "@type": "Offer",
+        url,
+        priceCurrency: "INR",
+        price: product.rentalPrice.perDay,
+        availability: product.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+        businessFunction: "http://purl.org/goodrelations/v1#LeaseOut",
+        priceSpecification: {
+          "@type": "UnitPriceSpecification",
+          price: product.rentalPrice.perDay,
+          priceCurrency: "INR",
+          unitCode: "DAY",
+          referenceQuantity: { "@type": "QuantitativeValue", value: 1, unitCode: "DAY" },
+        },
+        seller: { "@type": "Organization", name: SITE_NAME },
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Shop", item: absoluteUrl("/shop") },
+        ...(category
+          ? [{ "@type": "ListItem", position: 2, name: category.label, item: absoluteUrl(`/shop?category=${category.id}`) }]
+          : []),
+        { "@type": "ListItem", position: category ? 3 : 2, name: product.name, item: url },
+      ],
+    },
+  ];
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        // JSON.stringify output is safe here; "<" is escaped so a product name can't close the tag.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+      />
+      <ProductDetailContent productId={product.id} initialProduct={product} />
+    </>
+  );
 }

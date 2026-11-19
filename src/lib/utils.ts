@@ -93,3 +93,8 @@ export function removeAuthUser(): void {
 }
 
 
+
+/** Loose, practical email check: something@something.tld with no spaces. Trims first. */
+export function isValidEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim());
+}

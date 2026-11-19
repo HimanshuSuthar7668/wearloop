@@ -1,196 +1,90 @@
-import Link from "next/link";
-import { Search, Calendar, Package, RotateCcw, Shield, Sparkles, ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
+import { PageHeader, Section, RuledList, PageFooterNote, ButtonLink } from "@/components/ui/Page";
 
-export const metadata: Metadata = {
-  title: "How It Works — Fashion Rental Made Simple",
+export const metadata: Metadata = pageMetadata({
+  title: "How renting works",
   description:
-    "Learn how WearLoop's clothing rental service works in four simple steps — browse, pick your dates, receive pristine pieces, and return with ease.",
-  keywords: [
-    "how fashion rental works",
-    "how to rent clothes India",
-    "WearLoop rental process",
-    "clothes on rent steps",
-  ],
-  alternates: {
-    canonical: "https://www.wearloop.in/how-it-works",
-  },
-  openGraph: {
-    title: "How WearLoop Works — Fashion Rental Made Simple",
-    description:
-      "Four easy steps to a full designer wardrobe — browse, pick dates, receive, return. No subscriptions. Free delivery.",
-    url: "https://www.wearloop.in/how-it-works",
-    type: "website",
-  },
-  twitter: {
-    title: "How WearLoop Works — Fashion Rental Made Simple",
-    description:
-      "Four easy steps to a full designer wardrobe — browse, pick dates, receive, return. No subscriptions. Free delivery.",
-  },
-};
+    "Pick a piece and your dates, get it delivered cleaned the day before, then send it back in the prepaid bag.",
+  path: "/how-it-works",
+});
 
 const steps = [
   {
-    icon: Search,
-    step: "01",
-    title: "Browse & choose",
-    description:
-      "Explore our curated collection of 2,400+ pieces from premium brands. Filter by occasion, size, style, and rental duration. Add items to your bag — no commitment until checkout.",
-    detail: "New pieces added every week.",
+    title: "Find something",
+    meta: "New pieces go up every week",
+    body: "There are 2,400+ pieces from premium labels. Filter by occasion, size and how long you need it. Nothing is charged until checkout, so add as many as you like while you decide.",
   },
   {
-    icon: Calendar,
-    step: "02",
     title: "Pick your dates",
-    description:
-      "Choose when you need the piece — whether it's a single day, a long weekend, or a full week. Flexible calendar booking means you always get it when you need it.",
-    detail: "Book up to 60 days in advance.",
+    meta: "Book up to 60 days ahead",
+    body: "A single day, a long weekend or a full week. Choose the day you need it and we'll work backwards from there.",
   },
   {
-    icon: Package,
-    step: "03",
-    title: "Delivered, pristine",
-    description:
-      "We professionally dry-clean and inspect every item before shipping. Your rental arrives in a reusable WearLoop garment bag, delivered to your door the day before your rental start.",
-    detail: "Free delivery on all orders.",
+    title: "It arrives the day before",
+    meta: "Delivery is free",
+    body: "Every piece is dry-cleaned and checked before it leaves us, then delivered in a reusable WearLoop garment bag the day before your rental starts.",
   },
   {
-    icon: RotateCcw,
-    step: "04",
-    title: "Wear, return, repeat",
-    description:
-      "Enjoy wearing it. When your rental ends, fold it into the pre-paid return bag and hand it to any courier or drop it at a partner location. We handle the rest.",
-    detail: "Returns in under 3 minutes.",
+    title: "Send it back",
+    meta: "Takes about three minutes",
+    body: "Fold it into the prepaid return bag and hand it to the courier, or drop it at a partner location. Cleaning and repairs are on us.",
   },
+];
+
+const promises = [
+  { title: "If it doesn't fit", body: "Tell us within 2 hours of delivery and we'll send a replacement or give you full credit." },
+  { title: "Delivery", body: "Free on every order. The return bag is prepaid and comes in the box." },
+  { title: "Between rentals", body: "Each piece is cleaned and goes through a 12-point check before it's sent out again." },
 ];
 
 const faqs = [
   {
-    q: "What if an item doesn't fit?",
-    a: "We offer a Fit Guarantee — if your item doesn't fit, contact us within 2 hours of delivery for a free replacement or full credit.",
+    title: "What if I damage something?",
+    body: "Normal wear is expected and covered. For real damage there's a repair fee of 10 to 30% of the retail price, which you can avoid entirely by adding Accidental Damage Protection at checkout.",
   },
   {
-    q: "What if I damage an item?",
-    a: "Minor wear is expected and covered. For significant damage, we charge a repair fee (10–30% of retail value). Accidental damage protection is available at checkout.",
+    title: "Can I keep it longer?",
+    body: "Yes, if you extend at least 48 hours before your return date. Extra days are charged at the daily rate, as long as nobody else has booked it.",
   },
   {
-    q: "How clean are the items?",
-    a: "Every item is professionally dry-cleaned and inspected after each rental. We have a strict 12-point quality check before any piece ships again.",
-  },
-  {
-    q: "Can I extend my rental?",
-    a: "Yes, up to 48 hours before your return date through your account. Extensions are charged at the daily rate and subject to availability.",
-  },
-  {
-    q: "Is there a membership fee?",
-    a: "No. WearLoop is pay-as-you-go. You only pay when you rent something.",
+    title: "Is there a membership fee?",
+    body: "No. You pay for what you rent and nothing else.",
   },
 ];
 
 export default function HowItWorksPage() {
   return (
-    <div className="min-h-screen pt-20">
-      {/* Hero */}
-      <section className="max-w-4xl mx-auto px-6 md:px-10 py-16 text-center">
-        <p className="text-xs uppercase tracking-[0.25em] text-[#c9a898] mb-4">
-          Simple by design
-        </p>
-        <h1 className="font-display text-5xl md:text-6xl font-bold text-parchment mb-5 text-balance">
-          Renting clothes should be
-          <br />
-          <em className="not-italic text-[#c9a898]">this easy.</em>
-        </h1>
-        <p className="text-parchment/50 text-lg max-w-lg mx-auto">
-          From browsing to your door in a few taps. No subscriptions, no
-          surprises, no effort.
-        </p>
-      </section>
+    <div className="pt-20">
+      <PageHeader
+        title="From your basket to your door, and back again."
+        intro="Renting should take less effort than buying. Here's every step, including the bits people usually ask about afterwards."
+      />
 
-      {/* Steps */}
-      <section className="max-w-7xl mx-auto px-6 md:px-10 pb-24">
-        <div className="grid md:grid-cols-2 gap-6">
-          {steps.map(({ icon: Icon, step, title, description, detail }) => (
-            <div
-              key={step}
-              className="relative p-8 rounded-2xl border border-parchment/8 hover:border-parchment/16 transition-colors bg-charcoal-light overflow-hidden"
-            >
-              <span className="absolute top-6 right-6 font-display text-7xl font-bold text-parchment/[0.04]">
-                {step}
-              </span>
-              <div className="flex items-start gap-5">
-                <div className="shrink-0 w-12 h-12 rounded-xl bg-rose/10 border border-rose/20 flex items-center justify-center">
-                  <Icon size={20} className="text-[#c9a898]" />
-                </div>
-                <div>
-                  <h2 className="font-display text-xl font-semibold text-parchment mb-2">
-                    {title}
-                  </h2>
-                  <p className="text-sm text-parchment/50 leading-relaxed mb-3">
-                    {description}
-                  </p>
-                  <div className="flex items-center gap-2 text-xs text-sage">
-                    <Sparkles size={10} />
-                    {detail}
-                  </div>
-                </div>
-              </div>
+      <Section title="Four steps">
+        <RuledList items={steps} numbered />
+      </Section>
+
+      <Section title="What we promise" tinted>
+        <dl className="grid sm:grid-cols-3 gap-8">
+          {promises.map(({ title, body }) => (
+            <div key={title} className="border-t border-ink/25 pt-4">
+              <dt className="font-display text-lg text-ink">{title}</dt>
+              <dd className="mt-2 text-sm text-ink/75 leading-relaxed">{body}</dd>
             </div>
           ))}
-        </div>
-      </section>
+        </dl>
+      </Section>
 
-      {/* Trust bar */}
-      <section className="bg-charcoal-light border-y border-parchment/10 py-12">
-        <div className="max-w-5xl mx-auto px-6 md:px-10 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          {[
-            { icon: Shield, label: "Fit Guarantee", sub: "Free replacement if it doesn't fit" },
-            { icon: Package, label: "Free Delivery", sub: "On every order, always" },
-            { icon: RotateCcw, label: "Easy Returns", sub: "Pre-paid return bag included" },
-            { icon: Sparkles, label: "Cleaned & Inspected", sub: "12-point quality check" },
-          ].map(({ icon: Icon, label, sub }) => (
-            <div key={label} className="flex flex-col items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-parchment/5 border border-parchment/10 flex items-center justify-center">
-                <Icon size={16} className="text-parchment/40" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-parchment">{label}</p>
-                <p className="text-xs text-parchment/40 mt-0.5">{sub}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      <Section title="Questions people ask" aside="The full list lives on the FAQ page.">
+        <RuledList items={faqs} />
+      </Section>
 
-      {/* FAQ */}
-      <section className="max-w-3xl mx-auto px-6 md:px-10 py-24">
-        <h2 className="font-display text-3xl font-bold text-parchment mb-10 text-center">
-          Common questions
-        </h2>
-        <div className="flex flex-col divide-y divide-parchment/10">
-          {faqs.map(({ q, a }) => (
-            <div key={q} className="py-6">
-              <h3 className="font-display text-base font-semibold text-parchment mb-2">
-                {q}
-              </h3>
-              <p className="text-sm text-parchment/50 leading-relaxed">{a}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="max-w-7xl mx-auto px-6 md:px-10 pb-24 text-center">
-        <p className="font-display text-2xl font-semibold text-parchment mb-4">
-          Ready to start?
-        </p>
-        <Link
-          href="/shop"
-          className="inline-flex items-center gap-2 bg-rose text-charcoal font-semibold text-sm px-8 py-4 rounded-lg hover:bg-rose-dark transition-colors group"
-        >
-          Browse the collection
-          <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-        </Link>
-      </section>
+      <PageFooterNote
+        title="Seen enough?"
+        body="The collection is the best explanation."
+        action={<ButtonLink href="/shop">Browse the collection</ButtonLink>}
+      />
     </div>
   );
 }

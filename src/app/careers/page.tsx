@@ -1,215 +1,94 @@
-import Link from "next/link";
-import {
-  Heart,
-  Users,
-  TrendingUp,
-  Sparkles,
-  Code2,
-  PackageSearch,
-  Handshake,
-  Headphones,
-  ArrowRight,
-  Mail,
-} from "lucide-react";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
+import { PageHeader, Section, RuledList, PageFooterNote, ButtonLink, TextLink } from "@/components/ui/Page";
 
-export const metadata: Metadata = {
-  title: "Careers at WearLoop",
+export const metadata: Metadata = pageMetadata({
+  title: "Careers",
   description:
-    "Join the team building India's premium clothing rental platform. Open roles in engineering, operations, merchandising, and customer experience.",
-  keywords: [
-    "WearLoop careers",
-    "fashion tech jobs India",
-    "sustainable fashion startup jobs",
-    "jobs at WearLoop",
-    "Bengaluru startup hiring",
-  ],
-  alternates: {
-    canonical: "https://www.wearloop.in/careers",
-  },
-  openGraph: {
-    title: "Careers at WearLoop — Build the Future of Fashion",
-    description:
-      "Help us build the wardrobe of the future. Open roles in engineering, ops, merchandising, and support.",
-    url: "https://www.wearloop.in/careers",
-    type: "website",
-  },
-  twitter: {
-    title: "Careers at WearLoop — Build the Future of Fashion",
-    description:
-      "Help us build the wardrobe of the future. Open roles in engineering, ops, merchandising, and support.",
-  },
-};
+    "Open roles at WearLoop in engineering, operations, partnerships and support, in Bengaluru, Mumbai and remote.",
+  path: "/careers",
+});
 
 const values = [
   {
-    icon: Heart,
-    title: "Care like it's your own closet",
-    description:
-      "We treat every garment, every order, and every member interaction the way we'd want to be treated — with attention, not just efficiency.",
+    title: "Treat it like your own wardrobe",
+    body: "Every garment, every order and every member message gets the attention we'd want ourselves. Fast is good; careful is better.",
   },
   {
-    icon: Users,
     title: "Small team, real ownership",
-    description:
-      "We're a lean team where everyone ships things members actually use. No layers of approval between an idea and a member seeing it.",
+    body: "Everyone here ships things members actually use. There aren't layers of sign-off between an idea and a member seeing it.",
   },
   {
-    icon: TrendingUp,
-    title: "Built for the long run",
-    description:
-      "We're building a category in India, not chasing a quarter. That means we optimise for durable decisions over quick wins.",
+    title: "Patient decisions",
+    body: "We're building a new kind of shopping habit in India, and that takes years. We'd rather make decisions that hold up than chase a good quarter.",
   },
 ];
 
 const roles = [
   {
-    icon: Code2,
     title: "Software Engineer",
     department: "Engineering",
-    location: "Bengaluru / Remote",
-    type: "Full-time",
+    location: "Bengaluru or remote",
     description:
-      "Help build the product members and our fulfilment team use every day — from the shopping experience to the internal tools that keep inventory moving.",
+      "Build what members and the fulfilment team use every day, from the shop itself to the internal tools that keep stock moving.",
   },
   {
-    icon: PackageSearch,
     title: "Fulfilment Ops Associate",
     department: "Operations",
     location: "Bengaluru",
-    type: "Full-time",
     description:
-      "Own quality inspection, cleaning coordination, and packing at our fulfilment hub, making sure every piece leaves in pristine condition and on time.",
+      "Run inspection, cleaning and packing at the hub, and make sure every piece leaves on time and in perfect condition.",
   },
   {
-    icon: Handshake,
     title: "Brand Partnerships Lead",
     department: "Merchandising",
-    location: "Mumbai / Remote",
-    type: "Full-time",
+    location: "Mumbai or remote",
     description:
-      "Grow our catalogue by signing new brand and designer partners, and manage the relationships that keep our collection fresh every week.",
+      "Sign new labels and designers, and look after the relationships that keep the collection changing every week.",
   },
   {
-    icon: Headphones,
     title: "Customer Experience Associate",
     department: "Support",
     location: "Remote",
-    type: "Full-time",
     description:
-      "Be the voice of WearLoop for members — resolving sizing questions, delivery issues, and everything in between with warmth and speed.",
+      "Help members with sizing questions, delivery problems and everything in between, quickly and kindly.",
   },
 ];
 
 export default function CareersPage() {
   return (
-    <div className="min-h-screen pt-20">
-      {/* Hero */}
-      <section className="max-w-4xl mx-auto px-6 md:px-10 py-16 text-center">
-        <p className="text-xs uppercase tracking-[0.25em] text-[#c9a898] mb-4">
-          Join the team
-        </p>
-        <h1 className="font-display text-5xl md:text-6xl font-bold text-parchment mb-5 text-balance">
-          Help us build the
-          <br />
-          <em className="not-italic text-[#c9a898]">wardrobe of the future.</em>
-        </h1>
-        <p className="text-parchment/50 text-lg max-w-lg mx-auto">
-          We&apos;re a small team solving a big problem — how India gets dressed
-          without the waste. If that sounds like your kind of problem, we&apos;d
-          love to talk.
-        </p>
-      </section>
+    <div className="pt-20">
+      <PageHeader
+        title="Help India get dressed without the waste."
+        intro="We're a small team with a big problem to work on. If it sounds like your kind of problem, we'd like to hear from you."
+      />
 
-      {/* Values */}
-      <section className="max-w-7xl mx-auto px-6 md:px-10 pb-20">
-        <div className="grid md:grid-cols-3 gap-6">
-          {values.map(({ icon: Icon, title, description }) => (
-            <div
-              key={title}
-              className="p-8 rounded-2xl border border-parchment/8 hover:border-parchment/16 transition-colors bg-charcoal-light"
-            >
-              <div className="w-12 h-12 rounded-xl bg-rose/10 border border-rose/20 flex items-center justify-center mb-5">
-                <Icon size={20} className="text-[#c9a898]" />
+      <Section title="How we work">
+        <RuledList items={values} />
+      </Section>
+
+      <Section title="Open roles" aside="All roles are full-time." tinted>
+        <ul className="divide-y divide-ink/15 border-y border-ink/15">
+          {roles.map(({ title, department, location, description }) => (
+            <li key={title} className="py-6 grid sm:grid-cols-[1fr_1.5fr_auto] gap-x-6 gap-y-3 sm:items-baseline">
+              <div>
+                <h3 className="font-display text-lg text-ink">{title}</h3>
+                <p className="mt-1 text-sm text-ink/60">
+                  {department}, {location}
+                </p>
               </div>
-              <h3 className="font-display text-lg font-semibold text-parchment mb-3">
-                {title}
-              </h3>
-              <p className="text-sm text-parchment/50 leading-relaxed">
-                {description}
-              </p>
-            </div>
+              <p className="text-sm text-ink/75 leading-relaxed">{description}</p>
+              <TextLink href={`mailto:careers@wearloop.in?subject=Application: ${title}`}>Apply</TextLink>
+            </li>
           ))}
-        </div>
-      </section>
+        </ul>
+      </Section>
 
-      {/* Open roles */}
-      <section className="bg-charcoal-light border-y border-parchment/10 py-20">
-        <div className="max-w-5xl mx-auto px-6 md:px-10">
-          <div className="flex items-center gap-2 justify-center mb-3 text-sage">
-            <Sparkles size={14} />
-            <span className="text-xs uppercase tracking-widest">
-              Open roles
-            </span>
-          </div>
-          <h2 className="font-display text-3xl font-bold text-parchment text-center mb-12">
-            Where we&apos;re hiring right now
-          </h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            {roles.map(({ icon: Icon, title, department, location, type, description }) => (
-              <div
-                key={title}
-                className="p-8 rounded-2xl border border-parchment/10 bg-charcoal hover:border-parchment/20 transition-colors flex flex-col"
-              >
-                <div className="flex items-start justify-between gap-4 mb-4">
-                  <div className="w-11 h-11 rounded-xl bg-sage/10 border border-sage/20 flex items-center justify-center shrink-0">
-                    <Icon size={18} className="text-sage" />
-                  </div>
-                  <span className="text-xs text-parchment/40 border border-parchment/10 rounded-full px-3 py-1 whitespace-nowrap">
-                    {type}
-                  </span>
-                </div>
-                <h3 className="font-display text-lg font-semibold text-parchment mb-1">
-                  {title}
-                </h3>
-                <p className="text-xs uppercase tracking-widest text-[#c9a898] mb-3">
-                  {department} &middot; {location}
-                </p>
-                <p className="text-sm text-parchment/50 leading-relaxed mb-6 flex-1">
-                  {description}
-                </p>
-                <a
-                  href={`mailto:careers@wearloop.in?subject=Application: ${title}`}
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-parchment hover:text-[#c9a898] transition-colors"
-                >
-                  <Mail size={14} />
-                  Apply for this role
-                </a>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Don't see a fit */}
-      <section className="max-w-3xl mx-auto px-6 md:px-10 py-24 text-center">
-        <h2 className="font-display text-2xl font-semibold text-parchment mb-4">
-          Don&apos;t see the right role?
-        </h2>
-        <p className="text-parchment/50 leading-relaxed mb-6">
-          We&apos;re growing quickly and always open to meeting people who care
-          about circular fashion. Send us your resume and a note about what
-          you&apos;d want to work on — we read every message.
-        </p>
-        <a
-          href="mailto:careers@wearloop.in?subject=General Application"
-          className="inline-flex items-center gap-2 bg-rose text-charcoal font-semibold text-sm px-8 py-4 rounded-lg hover:bg-rose-dark transition-colors group"
-        >
-          <Mail size={16} />
-          careers@wearloop.in
-          <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-        </a>
-      </section>
+      <PageFooterNote
+        title="Nothing that fits?"
+        body="Send a CV and a few lines about what you'd want to work on. We read all of them."
+        action={<ButtonLink href="mailto:careers@wearloop.in?subject=General application">careers@wearloop.in</ButtonLink>}
+      />
     </div>
   );
 }
